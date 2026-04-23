@@ -1,0 +1,38 @@
+{
+  "name": "@stylemart/backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/worker.ts",
+    "build": "tsc --outDir dist",
+    "start": "node dist/worker.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@stylemart/shared": "*",
+    "@upstash/ratelimit": "^1.2.0",
+    "@upstash/redis": "^1.35.2",
+    "@react-email/components": "^0.0.32",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "^5.34.6",
+    "cloudinary": "^2.5.1",
+    "ioredis": "^5.4.2",
+    "jose": "^5.9.6",
+    "mongoose": "^8.9.0",
+    "nodemailer": "^6.9.16",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-email": "^4.0.0",
+    "razorpay": "^2.9.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.0",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
