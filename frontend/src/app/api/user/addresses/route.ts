@@ -7,6 +7,20 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from "@/lib/api-response";
+import { z } from "zod";
+
+const createAddressSchema = z.object({
+  label: z.string().optional().default("Home"),
+  fullName: z.string().min(2, "Full name is required"),
+  phone: z.string().regex(/^[0-9]{10}$/, "Phone must be a 10-digit number"),
+  addressLine1: z.string().min(5, "Address line 1 is required"),
+  addressLine2: z.string().optional(),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  pincode: z.string().regex(/^[0-9]{6}$/, "Pincode must be a 6-digit number"),
+  country: z.string().default("India"),
+  isDefault: z.boolean().default(false),
+});
 
 export async function GET(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
@@ -30,11 +44,17 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
     const body = await request.json();
-    const { label, fullName, phone, addressLine1, addressLine2, city, state, pincode, country = "India", isDefault = false } = body;
 
-    if (!fullName || !phone || !addressLine1 || !city || !state || !pincode) {
-      return errorResponse("Missing required address fields", "VALIDATION_ERROR", 400);
+    const validated = createAddressSchema.safeParse(body);
+    if (!validated.success) {
+      return errorResponse(
+        validated.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
+        "VALIDATION_ERROR",
+        400
+      );
     }
+
+    const { label, fullName, phone, addressLine1, addressLine2, city, state, pincode, country, isDefault } = validated.data;
 
     if (isDefault) {
       await Address.updateMany({ userId: token.id }, { isDefault: false });
@@ -42,14 +62,14 @@ export async function POST(request: NextRequest) {
 
     await Address.create({
       userId: token.id,
-      label: label ?? "Home",
+      label,
       fullName,
       phone,
       addressLine1,
       addressLine2,
       city,
       state,
-      pincode: String(pincode),
+      pincode,
       country,
       isDefault,
     });
@@ -58,7 +78,8 @@ export async function POST(request: NextRequest) {
       .sort({ isDefault: -1, createdAt: -1 })
       .lean();
     return successResponse(addresses, 201);
-  } catch {
+  } catch (err) {
+    console.error("[POST /api/user/addresses] Error:", err);
     return errorResponse("Failed to create address", "INTERNAL_ERROR", 500);
   }
 }
