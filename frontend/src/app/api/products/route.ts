@@ -11,8 +11,22 @@ import {
 } from "@/lib/api-response";
 import { computeFinalPrice } from "@/lib/utils";
 import { CACHE_TTL, DEFAULT_PAGE_SIZE } from "@stylemart/shared/constants";
+import { rateLimiters } from "@backend/lib/ratelimit";
+import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
 
 export async function GET(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "anonymous";
+
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.publicProducts,
+    ip
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     await connectDB();
 

@@ -11,6 +11,8 @@ import User from "@/models/User";
 import Razorpay from "razorpay";
 import { z } from "zod";
 import { enqueueOrderConfirmEmail } from "@backend/jobs/email.queue";
+import { rateLimiters } from "@backend/lib/ratelimit";
+import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
 
 const createOrderSchema = z.object({
   addressId: z.string(),
@@ -24,16 +26,23 @@ const razorpay = new Razorpay({
 });
 
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized", data: null },
+      { status: 401 }
+    );
+  }
+
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.paymentEndpoint,
+    session.user.id
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     await connectDB();
-
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized", data: null },
-        { status: 401 }
-      );
-    }
 
     const body = await request.json();
     const validated = createOrderSchema.safeParse(body);

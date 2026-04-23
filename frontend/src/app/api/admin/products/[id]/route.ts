@@ -13,6 +13,8 @@ import {
 } from "@/lib/api-response";
 import { z } from "zod";
 import { slugify } from "@shared/utils";
+import { rateLimiters } from "@backend/lib/ratelimit";
+import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -42,6 +44,13 @@ export async function GET(request: NextRequest, ctx: RouteContext) {
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.adminEndpoint,
+    token.id as string
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     await connectDB();
     const { id } = await ctx.params;
@@ -64,6 +73,13 @@ export async function PUT(request: NextRequest, ctx: RouteContext) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
+
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.adminEndpoint,
+    token.id as string
+  );
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     await connectDB();
@@ -123,6 +139,13 @@ export async function DELETE(request: NextRequest, ctx: RouteContext) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
+
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.adminEndpoint,
+    token.id as string
+  );
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     await connectDB();

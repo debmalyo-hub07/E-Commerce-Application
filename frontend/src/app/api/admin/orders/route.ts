@@ -9,6 +9,8 @@ import {
   unauthorizedResponse,
   buildPaginationMeta,
 } from "@/lib/api-response";
+import { rateLimiters } from "@backend/lib/ratelimit";
+import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
 
 function isAdmin(role: string) {
   return role === "ADMIN" || role === "SUPER_ADMIN";
@@ -18,6 +20,13 @@ export async function GET(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
+
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.adminEndpoint,
+    token.id as string
+  );
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     await connectDB();

@@ -4,6 +4,8 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { z } from "zod";
+import { rateLimiters } from "@backend/lib/ratelimit";
+import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -12,6 +14,14 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "anonymous";
+
+  const rateLimitResponse = await applyRateLimit(request, rateLimiters.authEndpoint, ip);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     await connectDB();
 
