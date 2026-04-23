@@ -47,6 +47,9 @@ export default function OrderDetail() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [showCancelForm, setShowCancelForm] = useState(false);
+  const [refunding, setRefunding] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
+  const [showRefundForm, setShowRefundForm] = useState(false);
 
   useEffect(() => {
     if (!session || !params.id) return;
@@ -86,6 +89,19 @@ export default function OrderDetail() {
     return ageMs < oneHourMs;
   };
 
+  const canRefund = () => {
+    if (!order) return false;
+    if (order.orderStatus !== "DELIVERED") return false;
+    if (order.paymentStatus === "REFUND_INITIATED" || order.paymentStatus === "REFUNDED") return false;
+
+    const updatedAtTime = new Date(order.updatedAt).getTime();
+    const nowTime = Date.now();
+    const ageMs = nowTime - updatedAtTime;
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+    return ageMs < sevenDaysMs;
+  };
+
   const handleCancel = async () => {
     try {
       setCancelling(true);
@@ -107,6 +123,35 @@ export default function OrderDetail() {
       alert(err instanceof Error ? err.message : "Failed to cancel order");
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!refundReason.trim()) {
+      alert("Please provide a reason for the refund");
+      return;
+    }
+
+    try {
+      setRefunding(true);
+      const response = await fetch(`/api/user/orders/${params.id}/refund`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: refundReason }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to request refund");
+      }
+
+      alert("Refund request submitted. Admin will review and process your request.");
+      setShowRefundForm(false);
+      location.reload();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to request refund");
+    } finally {
+      setRefunding(false);
     }
   };
 
@@ -295,6 +340,53 @@ export default function OrderDetail() {
                       className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 disabled:opacity-50"
                     >
                       Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {canRefund() && (
+            <div className="px-6 py-4 border-t bg-green-50">
+              {!showRefundForm ? (
+                <button
+                  onClick={() => setShowRefundForm(true)}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Request Refund
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Refund Reason *
+                    </label>
+                    <textarea
+                      value={refundReason}
+                      onChange={(e) => setRefundReason(e.target.value)}
+                      placeholder="Please tell us why you want a refund..."
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Refunds can only be requested within 7 days of delivery
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleRefund}
+                      disabled={refunding || !refundReason.trim()}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {refunding ? "Submitting..." : "Submit Refund Request"}
+                    </button>
+                    <button
+                      onClick={() => setShowRefundForm(false)}
+                      disabled={refunding}
+                      className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 disabled:opacity-50"
+                    >
+                      Cancel
                     </button>
                   </div>
                 </div>
