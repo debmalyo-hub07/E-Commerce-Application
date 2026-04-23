@@ -1,9 +1,12 @@
 import { type NextRequest } from "next/server";
+import mongoose from "mongoose";
 import { getToken } from "next-auth/jwt";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import AuditLog from "@/models/AuditLog";
+import User from "@/models/User";
+import { enqueueShippingUpdateEmail } from "@backend/jobs/email.queue";
 import {
   successResponse,
   errorResponse,
@@ -11,7 +14,7 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/api-response";
-import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@stylemart/shared/constants";
+import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@shared/constants";
 
 interface RouteContext { params: Promise<{ id: string }>; }
 
@@ -52,9 +55,9 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
     await connectDB();
     const { id } = await ctx.params;
     const body = await request.json();
-    const { orderStatus, notes } = body;
+    const { orderStatus, trackingNumber, notes } = body;
 
-    const order = await Order.findById(id).select("orderStatus").lean();
+    const order = await Order.findById(id);
     if (!order) return notFoundResponse("Order");
 
     const allowed = ALLOWED_ORDER_STATUS_TRANSITIONS[order.orderStatus] ?? [];
@@ -66,26 +69,81 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       );
     }
 
-    const updated = await Order.findByIdAndUpdate(
-      id,
-      { orderStatus, ...(notes ? { notes } : {}) },
-      { new: true }
-    ).lean();
+    if (orderStatus === "SHIPPED" && !trackingNumber) {
+      return errorResponse(
+        "Tracking number is required when marking order as SHIPPED",
+        "VALIDATION_ERROR",
+        400
+      );
+    }
 
-    await AuditLog.create({
-      userId: token.id,
-      action: "ORDER_STATUS_UPDATED",
-      entityType: "Order",
-      entityId: id,
-      metadata: {
-        from: order.orderStatus,
-        to: orderStatus,
-        updatedBy: token.email,
-      },
-    });
+    const mongoSession = await mongoose.startSession();
+    mongoSession.startTransaction();
 
-    return successResponse(updated);
-  } catch {
-    return errorResponse("Failed to update order", "INTERNAL_ERROR", 500);
+    try {
+      const updateData: Record<string, unknown> = { orderStatus };
+      if (notes) updateData.notes = notes;
+      if (trackingNumber) updateData.trackingNumber = trackingNumber;
+
+      const updated = await Order.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true, session: mongoSession }
+      );
+
+      await AuditLog.create(
+        [
+          {
+            userId: token.id,
+            action: "ORDER_STATUS_UPDATED",
+            entityType: "Order",
+            entityId: id,
+            metadata: {
+              from: order.orderStatus,
+              to: orderStatus,
+              updatedBy: token.email,
+              trackingNumber: trackingNumber || null,
+            },
+          },
+        ],
+        { session: mongoSession }
+      );
+
+      await mongoSession.commitTransaction();
+
+      const user = await User.findById(order.userId);
+      if (user && (orderStatus === "SHIPPED" || orderStatus === "DELIVERED")) {
+        try {
+          await enqueueShippingUpdateEmail({
+            to: user.email,
+            customerName: user.name,
+            orderNumber: order.orderNumber,
+            trackingNumber: trackingNumber || undefined,
+            carrier: "Standard Courier",
+            estimatedDelivery:
+              orderStatus === "SHIPPED"
+                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
+                : undefined,
+          });
+          console.log(`[Admin] Shipping update email queued for order ${order.orderNumber}`);
+        } catch (emailErr) {
+          console.error(`[Admin] Failed to queue shipping email:`, emailErr);
+        }
+      }
+
+      return successResponse(updated);
+    } catch (err) {
+      await mongoSession.abortTransaction();
+      throw err;
+    } finally {
+      mongoSession.endSession();
+    }
+  } catch (err) {
+    console.error("[PATCH /api/admin/orders/[id]] Error:", err);
+    return errorResponse(
+      err instanceof Error ? err.message : "Failed to update order",
+      "INTERNAL_ERROR",
+      500
+    );
   }
 }
