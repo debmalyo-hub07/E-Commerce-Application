@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth/config";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 import Payment from "@/models/Payment";
+import AuditLog from "@/models/AuditLog";
 import { z } from "zod";
 
 const verifySchema = z.object({
@@ -43,45 +44,22 @@ export async function POST(request: NextRequest) {
       .digest("hex");
 
     if (generatedSignature !== razorpay_signature) {
-      const mongoSession = await mongoose.startSession();
-      mongoSession.startTransaction();
-      try {
-        const order = await Order.findOne({ razorpayOrderId: razorpay_order_id }).session(mongoSession);
-        if (order) {
-          for (const item of order.items) {
-            await Product.findByIdAndUpdate(
-              item.productId,
-              { $inc: { stockQuantity: item.quantity } },
-              { session: mongoSession }
-            );
-          }
-          await Order.findByIdAndUpdate(
-            order._id,
-            { paymentStatus: "FAILED", orderStatus: "CANCELLED" },
-            { session: mongoSession }
-          );
-          await Payment.create(
-            [
-              {
-                orderId: order._id,
-                userId: order.userId,
-                amount: order.totalAmount,
-                currency: "INR",
-                method: "RAZORPAY",
-                status: "FAILED",
-                providerPaymentId: razorpay_payment_id,
-                providerOrderId: razorpay_order_id,
-              },
-            ],
-            { session: mongoSession }
-          );
-        }
-        await mongoSession.commitTransaction();
-      } catch (err) {
-        await mongoSession.abortTransaction();
-        throw err;
-      } finally {
-        mongoSession.endSession();
+      console.error(
+        `[Payment Verify] Signature mismatch - Order: ${razorpay_order_id}, Payment: ${razorpay_payment_id}`
+      );
+
+      const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+      if (order) {
+        await AuditLog.create({
+          userId: session.user.id,
+          action: "PAYMENT_VERIFICATION_FAILED",
+          entityType: "Order",
+          entityId: order._id,
+          metadata: {
+            orderNumber: order.orderNumber,
+            reason: "Signature verification failed",
+          },
+        });
       }
 
       return NextResponse.json(
@@ -133,6 +111,17 @@ export async function POST(request: NextRequest) {
       );
 
       await mongoSession.commitTransaction();
+
+      await AuditLog.create({
+        userId: session.user.id,
+        action: "PAYMENT_VERIFIED",
+        entityType: "Order",
+        entityId: order._id,
+        metadata: {
+          orderNumber: order.orderNumber,
+          paymentId: razorpay_payment_id,
+        },
+      });
 
       return NextResponse.json({
         success: true,
