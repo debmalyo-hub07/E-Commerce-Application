@@ -10,9 +10,7 @@ import Address from "@/models/Address";
 import User from "@/models/User";
 import Razorpay from "razorpay";
 import { z } from "zod";
-import { enqueueOrderConfirmEmail } from "@backend/jobs/email.queue";
-import { rateLimiters } from "@backend/lib/ratelimit";
-import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
+import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
 
 const createOrderSchema = z.object({
   addressId: z.string(),
@@ -209,14 +207,21 @@ export async function POST(request: NextRequest) {
             ? `${(addressSnapshot as any).fullName}, ${(addressSnapshot as any).addressLine1}, ${(addressSnapshot as any).city} ${(addressSnapshot as any).pincode}`
             : "Delivery Address";
 
-        await enqueueOrderConfirmEmail({
-          to: user.email,
-          customerName: user.name,
-          orderNumber: order.orderNumber,
-          items,
-          total: order.totalAmount,
-          shippingAddress,
-        });
+        try {
+          // Dynamically import backend email queue at runtime - won't be bundled with frontend
+          const { enqueueOrderConfirmEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
+          await enqueueOrderConfirmEmail({
+            to: user.email,
+            customerName: user.name,
+            orderNumber: order.orderNumber,
+            items,
+            total: order.totalAmount,
+            shippingAddress,
+          });
+        } catch (emailErr) {
+          console.error("Failed to queue confirmation email:", emailErr);
+          // Don't fail the order if email fails to queue
+        }
       }
 
       return NextResponse.json({

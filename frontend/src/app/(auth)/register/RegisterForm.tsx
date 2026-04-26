@@ -53,7 +53,17 @@ export function RegisterForm() {
         throw new Error(responseData.error || "Failed to register");
       }
 
-      // 2. Auto login
+      if (responseData.data?.requiresOtp) {
+        toast.success(responseData.data.message || "Please verify your email!");
+        // Store password temporarily in sessionStorage for auto-login after verification
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("temp_reg_pwd", data.password);
+        }
+        router.push(`/verify?email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+
+      // 2. Auto login (fallback if no OTP required)
       const result = await signIn("credentials", {
         redirect: false,
         email: data.email,

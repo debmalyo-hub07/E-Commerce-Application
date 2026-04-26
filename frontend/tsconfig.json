@@ -20,7 +20,10 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@stylemart/types": ["../shared/types"]
+      "@stylemart/types": ["../shared/types"],
+      "@stylemart/shared/constants": ["../shared/constants"],
+      "@stylemart/shared/utils": ["../shared/utils"],
+      "@stylemart/shared/lib/*": ["../shared/lib/*"]
     }
   },
   "include": [

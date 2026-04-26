@@ -1,10 +1,10 @@
 import { Queue, Worker, Job } from "bullmq";
-import { ioRedis } from "../lib/redis";
+import { createIORedisConnection } from "../lib/redis";
 import { notificationService, type CreateNotificationParams } from "../services/notification.service";
-import { QUEUE_NAMES } from "../../shared/constants";
+import { QUEUE_NAMES } from "@stylemart/shared/constants";
 
 export const notificationQueue = new Queue(QUEUE_NAMES.NOTIFICATION, {
-  connection: ioRedis,
+  connection: createIORedisConnection(),
   defaultJobOptions: {
     attempts: 3,
     backoff: { type: "exponential", delay: 500 },
@@ -22,7 +22,7 @@ export const notificationWorker = new Worker<CreateNotificationParams>(
     await notificationService.create(job.data);
     console.log(`[NotificationQueue] Created notification for user ${job.data.userId}`);
   },
-  { connection: ioRedis, concurrency: 10 }
+  { connection: createIORedisConnection(), concurrency: 10 }
 );
 
 notificationWorker.on("error", (err) => {

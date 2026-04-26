@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,16 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const verified = searchParams.get("verified");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (verified === "true") {
+      toast.success("Email verified! You can now log in.", { id: "verified-toast" });
+      // Remove query param to prevent toast firing again
+      router.replace("/login");
+    }
+  }, [verified, router]);
 
   const {
     register,

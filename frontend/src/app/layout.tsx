@@ -5,6 +5,7 @@ import { Providers } from "@/components/common/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { EnhancedDiscountNotification } from "@/components/layout/EnhancedDiscountNotification";
 import { auth } from "@/lib/auth/config";
 
 const inter = Inter({
@@ -87,7 +88,7 @@ export default async function RootLayout({
       className={`${inter.variable} ${outfit.variable} scroll-smooth`}
       suppressHydrationWarning
     >
-      <body className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col">
+      <body suppressHydrationWarning className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col overflow-x-hidden">
         <Providers session={session}>
           {/* Skip to main content for accessibility */}
           <a
@@ -97,6 +98,7 @@ export default async function RootLayout({
             Skip to main content
           </a>
 
+          <EnhancedDiscountNotification />
           <Navbar />
 
           {/* Cart Drawer (global, triggered by store) */}

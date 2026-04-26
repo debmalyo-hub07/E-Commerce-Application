@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { Check, Loader2, MapPin, Plus, ShieldCheck } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { formatCurrency } from "@stylemart/shared/utils";
 
 interface AddressData {
   id: string;
@@ -13,7 +14,7 @@ interface AddressData {
   fullName: string;
   phone: string;
   addressLine1: string;
-  addressLine2?: string;
+  addressLine2?: string | null;
   city: string;
   state: string;
   pincode: string;
@@ -34,7 +35,7 @@ export function CheckoutClient({ initialAddresses, userEmail, userName }: Checko
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     initialAddresses.length > 0 ? initialAddresses[0].id : null
   );
-  const [paymentMethod, setPaymentMethod] = useState<"CARD" | "UPI" | "COD">("UPI");
+  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "COD">("RAZORPAY");
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -66,9 +67,8 @@ export function CheckoutClient({ initialAddresses, userEmail, userName }: Checko
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address_id: selectedAddressId,
-          payment_method: paymentMethod,
-          cart_items: items,
+          addressId: selectedAddressId,
+          paymentMethod: paymentMethod,
         }),
       });
 
@@ -81,7 +81,7 @@ export function CheckoutClient({ initialAddresses, userEmail, userName }: Checko
       if (paymentMethod === "COD") {
         clearCart();
         toast.success("Order placed successfully with Cash on Delivery!");
-        router.push(`/account/orders/${orderData.order_id}`);
+        router.push(`/account/orders/${orderData.data?.orderId}`);
         return;
       }
 
@@ -91,12 +91,12 @@ export function CheckoutClient({ initialAddresses, userEmail, userName }: Checko
       }
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency,
+        key: orderData.data?.keyId,
+        amount: Math.round((orderData.data?.amount ?? 0) * 100),
+        currency: orderData.data?.currency ?? "INR",
         name: "StyleMart",
-        description: `Order #${orderData.order_number}`,
-        order_id: orderData.razorpay_order_id,
+        description: `Order #${orderData.data?.orderNumber}`,
+        order_id: orderData.data?.razorpayOrderId,
         handler: async function (response: Record<string, string>) {
           const verifyRes = await fetch("/api/payment/verify", {
             method: "POST",
@@ -111,7 +111,7 @@ export function CheckoutClient({ initialAddresses, userEmail, userName }: Checko
           if (verifyRes.ok) {
             clearCart();
             toast.success("Payment successful! Order confirmed.");
-            router.push(`/account/orders/${orderData.order_id}`);
+            router.push(`/account/orders/${orderData.data?.orderId}`);
           } else {
             toast.error("Payment verification failed. Please contact support.");
           }
@@ -201,15 +201,14 @@ export function CheckoutClient({ initialAddresses, userEmail, userName }: Checko
             Payment Method
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-border p-1 rounded-xl bg-muted/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-border p-1 rounded-xl bg-muted/30">
             {[
-              { id: "UPI", label: "UPI" },
-              { id: "CARD", label: "Credit/Debit Card" },
+              { id: "RAZORPAY", label: "Pay Online (UPI / Card / Netbanking)" },
               { id: "COD", label: "Cash on Delivery" },
             ].map((method) => (
               <button
                 key={method.id}
-                onClick={() => setPaymentMethod(method.id as "CARD" | "UPI" | "COD")}
+                onClick={() => setPaymentMethod(method.id as "RAZORPAY" | "COD")}
                 className={`flex items-center justify-center py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
                   paymentMethod === method.id
                     ? "bg-background border border-border shadow-sm text-primary"

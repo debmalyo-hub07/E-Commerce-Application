@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Review from "@/models/Review";
 import AuditLog from "@/models/AuditLog";
@@ -26,7 +26,8 @@ const approvalSchema = z.object({
 });
 
 export async function GET(_req: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: _req, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -48,7 +49,8 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 }
 
 export async function PATCH(request: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -93,7 +95,8 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
 }
 
 export async function DELETE(_req: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: _req, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 

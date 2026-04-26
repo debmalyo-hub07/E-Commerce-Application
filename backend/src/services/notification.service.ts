@@ -1,5 +1,5 @@
 import { connectDB } from "../lib/mongoose";
-import Notification from "../../frontend/src/models/Notification";
+import Notification from "@/models/Notification";
 
 export type NotificationType =
   | "order_update"

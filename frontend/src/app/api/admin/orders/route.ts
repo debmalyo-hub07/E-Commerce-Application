@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import {
@@ -9,15 +9,15 @@ import {
   unauthorizedResponse,
   buildPaginationMeta,
 } from "@/lib/api-response";
-import { rateLimiters } from "@backend/lib/ratelimit";
-import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
+import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -63,3 +63,4 @@ export async function GET(request: NextRequest) {
     return errorResponse("Failed to fetch orders", "INTERNAL_ERROR", 500);
   }
 }
+

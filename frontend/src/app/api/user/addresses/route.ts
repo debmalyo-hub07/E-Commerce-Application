@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Address from "@/models/Address";
 import {
@@ -10,20 +10,21 @@ import {
 import { z } from "zod";
 
 const createAddressSchema = z.object({
-  label: z.string().optional().default("Home"),
-  fullName: z.string().min(2, "Full name is required"),
-  phone: z.string().regex(/^[0-9]{10}$/, "Phone must be a 10-digit number"),
-  addressLine1: z.string().min(5, "Address line 1 is required"),
-  addressLine2: z.string().optional(),
-  city: z.string().min(2, "City is required"),
-  state: z.string().min(2, "State is required"),
-  pincode: z.string().regex(/^[0-9]{6}$/, "Pincode must be a 6-digit number"),
-  country: z.string().default("India"),
+  label: z.string().trim().optional().default("Home"),
+  fullName: z.string().trim().min(2, "Full name is required"),
+  phone: z.string().trim().regex(/^[0-9]{10}$/, "Phone must be a 10-digit number"),
+  addressLine1: z.string().trim().min(5, "Address line 1 is required"),
+  addressLine2: z.string().trim().optional(),
+  city: z.string().trim().min(2, "City is required"),
+  state: z.string().trim().min(2, "State is required"),
+  pincode: z.string().trim().regex(/^[0-9]{6}$/, "Pincode must be a 6-digit number"),
+  country: z.string().trim().default("India"),
   isDefault: z.boolean().default(false),
 });
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {
@@ -38,7 +39,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {
@@ -83,3 +85,4 @@ export async function POST(request: NextRequest) {
     return errorResponse("Failed to create address", "INTERNAL_ERROR", 500);
   }
 }
+

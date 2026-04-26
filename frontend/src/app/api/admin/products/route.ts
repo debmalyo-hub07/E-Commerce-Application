@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
@@ -12,12 +12,11 @@ import {
   buildPaginationMeta,
 } from "@/lib/api-response";
 import { z } from "zod";
-import { slugify } from "@shared/utils";
-import { rateLimiters } from "@backend/lib/ratelimit";
-import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
+import { slugify } from "@stylemart/shared/utils";
+import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 const createProductSchema = z.object({
@@ -26,17 +25,26 @@ const createProductSchema = z.object({
   description: z.string().optional(),
   brand: z.string().optional(),
   categoryId: z.string(),
-  basePrice: z.number().positive("Base price must be positive"),
-  sellingPrice: z.number().positive("Selling price must be positive"),
+  basePrice: z.number().min(0, "Base price cannot be negative"),
+  sellingPrice: z.number().min(0, "Selling price cannot be negative"),
   gstPercent: z.number().min(0).max(100).default(18),
   discountPercent: z.number().min(0).max(100).default(0),
   stockQuantity: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
+  images: z.array(
+    z.object({
+      url: z.string().url(),
+      publicId: z.string(),
+      isPrimary: z.boolean().default(false),
+      displayOrder: z.number().default(0),
+    })
+  ).optional().default([]),
 });
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -86,7 +94,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -150,3 +159,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

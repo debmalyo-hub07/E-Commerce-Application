@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
@@ -14,7 +14,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {

@@ -85,7 +85,6 @@ const OrderSchema = new Schema<IOrder>(
 );
 
 OrderSchema.index({ userId: 1 });
-OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ orderStatus: 1 });
 OrderSchema.index({ paymentStatus: 1 });
 

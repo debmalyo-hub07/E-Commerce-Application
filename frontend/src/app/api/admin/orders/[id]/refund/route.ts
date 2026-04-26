@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import mongoose from "mongoose";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
@@ -22,7 +22,8 @@ function isAdmin(role: string) {
 }
 
 export async function POST(request: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 

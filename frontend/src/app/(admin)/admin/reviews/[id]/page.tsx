@@ -149,8 +149,7 @@ export default function AdminReviewDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="space-y-6">
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b">
             <div className="flex justify-between items-start">
@@ -237,7 +236,6 @@ export default function AdminReviewDetailPage() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }

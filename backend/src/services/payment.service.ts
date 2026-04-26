@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { razorpay } from "../lib/razorpay";
 import { connectDB } from "../lib/mongoose";
-import AuditLog from "../../frontend/src/models/AuditLog";
+import AuditLog from "@/models/AuditLog";
 import type mongoose from "mongoose";
 
 interface CreateRazorpayOrderParams {

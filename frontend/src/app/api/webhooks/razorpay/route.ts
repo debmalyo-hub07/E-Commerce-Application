@@ -7,7 +7,6 @@ import Product from "@/models/Product";
 import Payment from "@/models/Payment";
 import ProcessedWebhookEvent from "@/models/ProcessedWebhookEvent";
 import User from "@/models/User";
-import { enqueueOrderConfirmEmail } from "@backend/jobs/email.queue";
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,16 +66,21 @@ export async function POST(request: NextRequest) {
                 ? `${(order.addressSnapshot as any).fullName}, ${(order.addressSnapshot as any).addressLine1}, ${(order.addressSnapshot as any).city} ${(order.addressSnapshot as any).pincode}`
                 : "Delivery Address";
 
-            await enqueueOrderConfirmEmail({
-              to: user.email,
-              customerName: user.name,
-              orderNumber: order.orderNumber,
-              items,
-              total: order.totalAmount,
-              shippingAddress,
-            });
+            try {
+              const { enqueueOrderConfirmEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
+              await enqueueOrderConfirmEmail({
+                to: user.email,
+                customerName: user.name,
+                orderNumber: order.orderNumber,
+                items,
+                total: order.totalAmount,
+                shippingAddress,
+              });
 
-            console.log(`[Webhook] payment.captured: Order ${order.orderNumber} confirmed and confirmation email queued`);
+              console.log(`[Webhook] payment.captured: Order ${order.orderNumber} confirmed and confirmation email queued`);
+            } catch (emailErr) {
+              console.error("[Webhook] Failed to queue confirmation email:", emailErr);
+            }
           } else {
             console.warn(`[Webhook] User not found for order ${order.orderNumber}`);
           }
@@ -135,15 +139,19 @@ export async function POST(request: NextRequest) {
               const user = await User.findById(order.userId);
               if (user) {
                 const refundAmount = (refund.amount as number) / 100;
-                const { enqueueRefundEmail } = await import("@backend/jobs/email.queue");
-                await enqueueRefundEmail({
-                  to: user.email,
-                  customerName: user.name,
-                  orderNumber: order.orderNumber,
-                  refundAmount,
-                  refundMethod: "Original Payment Method",
-                });
-                console.log(`[Webhook] Refund confirmation email queued for order ${order.orderNumber}`);
+                try {
+                  const { enqueueRefundEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
+                  await enqueueRefundEmail({
+                    to: user.email,
+                    customerName: user.name,
+                    orderNumber: order.orderNumber,
+                    refundAmount,
+                    refundMethod: "Original Payment Method",
+                  });
+                  console.log(`[Webhook] Refund confirmation email queued for order ${order.orderNumber}`);
+                } catch (emailErr) {
+                  console.error("[Webhook] Failed to queue refund email:", emailErr);
+                }
               }
             }
           }

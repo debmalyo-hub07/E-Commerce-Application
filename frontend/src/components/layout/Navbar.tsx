@@ -15,11 +15,13 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
 
 const categories = [
-  { name: "Electronics", slug: "electronics", sub: ["Smartphones", "Laptops", "Audio", "Cameras"] },
-  { name: "Fashion", slug: "fashion", sub: ["Men's", "Women's", "Kids", "Accessories"] },
-  { name: "Home & Kitchen", slug: "home-kitchen", sub: ["Furniture", "Appliances", "Decor", "Cookware"] },
-  { name: "Sports", slug: "sports-fitness", sub: ["Fitness", "Cricket", "Football", "Yoga"] },
-  { name: "Books", slug: "books", sub: ["Fiction", "Non-Fiction", "Academic", "Comics"] },
+  { name: "Electronics", slug: "electronics", sub: ["Smartphones", "Laptops", "Audio", "Cameras", "Wearables"] },
+  { name: "Fashion", slug: "fashion", sub: ["Men's", "Women's", "Kids", "Accessories", "Footwear"] },
+  { name: "Home & Kitchen", slug: "home-kitchen", sub: ["Furniture", "Appliances", "Decor", "Cookware", "Lighting"] },
+  { name: "Beauty & Health", slug: "beauty-health", sub: ["Skincare", "Makeup", "Haircare", "Personal Care"] },
+  { name: "Sports", slug: "sports-fitness", sub: ["Fitness", "Cricket", "Football", "Yoga", "Cycling"] },
+  { name: "Books & Media", slug: "books", sub: ["Fiction", "Non-Fiction", "Academic", "Comics", "Gaming"] },
+  { name: "Toys & Baby", slug: "toys-baby", sub: ["Action Figures", "Board Games", "Baby Care", "Educational"] },
 ];
 
 export function Navbar() {
@@ -56,82 +58,90 @@ export function Navbar() {
     enabled: debouncedQuery.length >= 2,
   });
 
-  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-50 w-full transition-all duration-500 ${
           isScrolled
-            ? "bg-background/95 backdrop-blur-md shadow-md border-b border-border"
-            : "bg-background border-b border-border"
+            ? "bg-background/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-b border-border/50"
+            : "bg-background/95 backdrop-blur-md border-b border-border"
         }`}
       >
-        {/* Top announcement bar */}
-        <div className="bg-primary text-primary-foreground text-center py-1.5 text-xs font-medium">
-          🎉 Free shipping on orders above ₹1,000 · Use code <strong>WELCOME20</strong> for 20% off
-        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center h-16 gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
-              >
-                <span className="text-primary-foreground font-bold text-sm">SM</span>
-              </motion.div>
-              <span className="font-outfit font-bold text-xl hidden sm:block">StyleMart</span>
-            </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1 ml-4">
-              {categories.map((cat) => (
-                <div
-                  key={cat.slug}
-                  className="relative"
-                  onMouseEnter={() => setActiveMegaMenu(cat.slug)}
-                  onMouseLeave={() => setActiveMegaMenu(null)}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="flex items-center justify-between h-20 gap-4">
+            {/* Left side: Logo */}
+            <div className="flex items-center gap-8 shrink-0">
+              <Link href="/" className="flex items-center gap-2 group">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: [0, -10, 10, 0] }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all duration-300"
                 >
-                  <Link
-                    href={`/products?category=${cat.slug}`}
-                    className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+                  <span className="text-white font-extrabold text-lg tracking-tighter">SM</span>
+                </motion.div>
+                <span className="font-outfit font-black text-2xl tracking-tight hidden sm:block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 group-hover:to-primary transition-all duration-300">
+                  StyleMart
+                </span>
+              </Link>
+
+              {/* Desktop Navigation (Hidden on medium screens) */}
+              <nav className="hidden xl:flex items-center gap-1">
+                {categories.map((cat) => (
+                  <div
+                    key={cat.slug}
+                    className="relative group"
+                    onMouseEnter={() => setActiveMegaMenu(cat.slug)}
+                    onMouseLeave={() => setActiveMegaMenu(null)}
                   >
-                    {cat.name}
-                    <ChevronDown className="w-3 h-3 opacity-60" />
-                  </Link>
+                    <Link
+                      href={`/products?category=${cat.slug}`}
+                      className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-bold text-foreground/70 hover:text-primary transition-all duration-300 whitespace-nowrap"
+                    >
+                      <span>{cat.name}</span>
+                      <ChevronDown className="w-3 h-3 opacity-40 group-hover:rotate-180 transition-transform" />
+                    </Link>
 
-                  <AnimatePresence>
-                    {activeMegaMenu === cat.slug && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute top-full left-0 mt-1 w-48 bg-popover border border-border rounded-xl shadow-xl p-2 z-50"
-                      >
-                        {cat.sub.map((sub) => (
-                          <Link
-                            key={sub}
-                            href={`/products?category=${cat.slug}&sub=${sub.toLowerCase()}`}
-                            className="block px-3 py-2 text-sm rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
-                          >
-                            {sub}
-                          </Link>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </nav>
+                    <AnimatePresence>
+                      {activeMegaMenu === cat.slug && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 15, scale: 0.95, rotateX: -10 }}
+                          animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95, transition: { duration: 0.1 } }}
+                          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                          style={{ transformPerspective: 1000 }}
+                          className="absolute top-full left-0 mt-2 w-56 bg-popover/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-3 z-50 transform-gpu"
+                        >
+                          {cat.sub.map((sub, i) => (
+                            <motion.div
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.03 }}
+                              key={sub}
+                            >
+                              <Link
+                                href={`/products?category=${cat.slug}&sub=${sub.toLowerCase().replace(/ /g, '-')}`}
+                                className="block px-4 py-2.5 text-sm font-medium rounded-xl hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                              >
+                                {sub}
+                              </Link>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </nav>
+            </div>
 
-            {/* Spacer */}
-            <div className="flex-1" />
-
-            {/* Search Bar */}
-            <div className="relative hidden md:flex items-center">
+            {/* Right side: Actions */}
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              {/* Search Bar */}
+              <div className="relative hidden md:flex items-center">
               <AnimatePresence>
                 {isSearchOpen ? (
                   <motion.div
@@ -147,7 +157,7 @@ export function Navbar() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && searchQuery.trim()) {
-                          window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+                          window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
                         }
                         if (e.key === "Escape") closeSearch();
                       }}
@@ -170,9 +180,9 @@ export function Navbar() {
                           exit={{ opacity: 0, y: 4 }}
                           className="absolute top-full mt-2 w-full bg-popover border border-border rounded-xl shadow-xl overflow-hidden z-50"
                         >
-                          {suggestions.slice(0, 5).map((product: { id: string; slug: string; name: string; category?: { name: string }; final_price?: number }) => (
+                          {suggestions.slice(0, 5).map((product: { _id: string; slug: string; name: string; category?: { name: string }; final_price?: number }) => (
                             <Link
-                              key={product.id}
+                              key={product._id}
                               href={`/products/${product.slug}`}
                               onClick={closeSearch}
                               className="flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-colors"
@@ -188,7 +198,7 @@ export function Navbar() {
                             </Link>
                           ))}
                           <Link
-                            href={`/search?q=${encodeURIComponent(searchQuery)}`}
+                            href={`/products?search=${encodeURIComponent(searchQuery)}`}
                             onClick={closeSearch}
                             className="block px-4 py-3 text-sm text-primary font-medium border-t border-border hover:bg-primary/5"
                           >
@@ -213,14 +223,14 @@ export function Navbar() {
             </div>
 
             {/* Action Icons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {/* Theme Toggle */}
               {mounted && (
                 <motion.button
                   onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  whileHover={{ scale: 1.1, rotate: 20 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-300"
                   aria-label="Toggle theme"
                 >
                   {resolvedTheme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -230,20 +240,20 @@ export function Navbar() {
               {/* Cart */}
               <motion.button
                 onClick={toggleCart}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label={`Shopping cart with ${itemCount} items`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="relative p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-300"
+                aria-label={`Shopping cart with ${mounted ? itemCount : 0} items`}
               >
                 <ShoppingCart className="w-5 h-5" />
                 <AnimatePresence>
-                  {itemCount > 0 && (
+                  {mounted && itemCount > 0 && (
                     <motion.span
                       key={itemCount}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center"
+                      className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-gradient-to-r from-primary to-indigo-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-lg shadow-primary/30"
                     >
                       {itemCount > 99 ? "99+" : itemCount}
                     </motion.span>
@@ -256,25 +266,25 @@ export function Navbar() {
                 <div className="relative group hidden sm:block">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 p-2 rounded-xl hover:bg-muted transition-colors"
+                    className="flex items-center gap-2 p-1.5 rounded-full hover:bg-muted/80 transition-all duration-300 border border-transparent hover:border-border"
                   >
-                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center overflow-hidden shadow-sm">
                       {session.user.image ? (
-                        <img src={session.user.image} alt="" className="w-7 h-7 rounded-full object-cover" />
+                        <img src={session.user.image} alt="" className="w-8 h-8 rounded-full object-cover" />
                       ) : (
-                        <span className="text-xs font-bold text-primary">
+                        <span className="text-xs font-black text-primary">
                           {session.user.name?.[0]?.toUpperCase() ?? "U"}
                         </span>
                       )}
                     </div>
-                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    <ChevronDown className="w-3 h-3 text-muted-foreground group-hover:rotate-180 transition-transform duration-300" />
                   </motion.button>
 
                   {/* Dropdown */}
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-xl shadow-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="px-3 py-2 border-b border-border mb-1">
-                      <p className="text-sm font-semibold">{session.user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
+                  <div className="absolute right-0 top-full mt-3 w-64 bg-popover/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform-gpu translate-y-2 group-hover:translate-y-0">
+                    <div className="px-4 py-3 border-b border-border/50 mb-2">
+                      <p className="text-sm font-bold tracking-tight">{session.user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{session.user.email}</p>
                     </div>
                     {[
                       { href: "/account/profile", icon: User, label: "My Profile" },
@@ -282,20 +292,20 @@ export function Navbar() {
                       { href: "/account/wishlist", icon: Heart, label: "Wishlist" },
                       { href: "/account/addresses", icon: Settings, label: "Addresses" },
                     ].map(({ href, icon: Icon, label }) => (
-                      <Link key={href} href={href} className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+                      <Link key={href} href={href} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-200">
                         <Icon className="w-4 h-4" />
                         {label}
                       </Link>
                     ))}
                     {isAdmin && (
-                      <Link href="/admin/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-primary/5 hover:text-primary transition-colors border-t border-border mt-1 pt-2">
+                      <Link href="/admin/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-200 border-t border-border/50 mt-2 pt-3">
                         <Shield className="w-4 h-4" />
                         Admin Dashboard
                       </Link>
                     )}
                     <button
                       onClick={() => signOut({ callbackUrl: "/" })}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-destructive/5 hover:text-destructive transition-colors mt-1"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 mt-2 border-t border-border/50 pt-3"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -303,21 +313,22 @@ export function Navbar() {
                   </div>
                 </div>
               ) : (
-                <div className="hidden sm:flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-sm font-medium rounded-xl hover:bg-muted transition-colors"
+                    className="hidden lg:block px-3 py-2 text-sm font-bold text-foreground/80 hover:text-primary transition-all"
                   >
-                    Login
+                    Log In
                   </Link>
                   <Link
                     href="/register"
-                    className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
+                    className="px-5 py-2.5 text-xs sm:text-sm font-black bg-gradient-to-r from-violet-600 to-primary text-white rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all whitespace-nowrap"
                   >
                     Sign Up
                   </Link>
                 </div>
               )}
+            </div>
 
               {/* Mobile menu toggle */}
               <button
@@ -351,7 +362,7 @@ export function Navbar() {
                     onKeyDown={(e) => {
                       const target = e.target as HTMLInputElement;
                       if (e.key === "Enter" && target.value.trim()) {
-                        window.location.href = `/search?q=${encodeURIComponent(target.value)}`;
+                        window.location.href = `/products?search=${encodeURIComponent(target.value)}`;
                       }
                     }}
                   />

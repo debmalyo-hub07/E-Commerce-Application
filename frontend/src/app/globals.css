@@ -159,3 +159,15 @@
 .font-outfit {
   font-family: var(--font-outfit);
 }
+
+/* ── Hide Next.js Dev Indicators ── */
+[data-nextjs-toast],
+nextjs-portal,
+[data-nextjs-dialog-overlay],
+body > [style*="position: fixed"][style*="z-index: 99999"],
+body > div[style*="bottom: 0"][style*="position: fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

@@ -82,6 +82,7 @@ export function HeroSection() {
               className="object-cover"
               priority={current === 0}
               aria-hidden="true"
+              unoptimized={true}
             />
           </div>
 

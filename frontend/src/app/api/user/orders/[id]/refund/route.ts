@@ -1,12 +1,11 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import AuditLog from "@/models/AuditLog";
 import User from "@/models/User";
-import { enqueueRefundEmail } from "@backend/jobs/email.queue";
 import {
   successResponse,
   errorResponse,
@@ -24,7 +23,8 @@ const refundRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {
@@ -102,12 +102,13 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
       const user = await User.findById(token.id);
       if (user) {
         try {
+          const { enqueueRefundEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
           await enqueueRefundEmail({
             to: user.email,
             customerName: user.name,
             orderNumber: order.orderNumber,
-            amount: order.totalAmount,
-            reason: validated.data.reason,
+            refundAmount: order.totalAmount,
+            refundMethod: "Original Payment Method",
           });
         } catch (emailErr) {
           console.error("[Refund] Failed to queue refund email:", emailErr);

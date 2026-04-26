@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import mongoose from "mongoose";
 import Razorpay from "razorpay";
 import { connectDB } from "@/lib/mongoose";
@@ -7,7 +7,6 @@ import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import AuditLog from "@/models/AuditLog";
 import User from "@/models/User";
-import { enqueueRefundStatusEmail } from "@backend/jobs/email.queue";
 import {
   successResponse,
   errorResponse,
@@ -36,7 +35,8 @@ const razorpay = new Razorpay({
 });
 
 export async function PATCH(request: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -129,13 +129,13 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       const user = await User.findById(order.userId);
       if (user) {
         try {
-          await enqueueRefundStatusEmail({
+          const { enqueueRefundEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
+          await enqueueRefundEmail({
             to: user.email,
             customerName: user.name,
             orderNumber: order.orderNumber,
-            status: validated.data.status,
-            amount: order.totalAmount,
-            note: validated.data.note,
+            refundAmount: order.totalAmount,
+            refundMethod: "Original Payment Method",
           });
         } catch (emailErr) {
           console.error("[Admin Refund] Failed to queue refund status email:", emailErr);

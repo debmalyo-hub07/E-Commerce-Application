@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
@@ -12,11 +12,12 @@ import {
 } from "@/lib/api-response";
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -38,6 +39,7 @@ export async function GET(request: NextRequest) {
       topProducts,
       ordersByStatus,
       ordersByPaymentStatus,
+      revenueTrendRaw,
     ] = await Promise.all([
       Order.aggregate([
         {
@@ -130,7 +132,31 @@ export async function GET(request: NextRequest) {
           },
         },
       ]),
+      Order.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: startDate },
+            paymentStatus: { $in: ["PAYMENT_VERIFIED", "REFUNDED"] },
+          },
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            revenue: { $sum: "$totalAmount" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
+
+    // Format revenue trend
+    const revenueTrend = revenueTrendRaw.map(day => {
+      const date = new Date(day._id);
+      return {
+        month: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        revenue: day.revenue
+      };
+    });
 
     return successResponse({
       summary: {
@@ -143,9 +169,11 @@ export async function GET(request: NextRequest) {
       topProducts,
       ordersByStatus,
       ordersByPaymentStatus,
+      revenueTrend,
     });
   } catch (err) {
     console.error("[GET /api/admin/analytics] Error:", err);
     return errorResponse("Failed to fetch analytics", "INTERNAL_ERROR", 500);
   }
 }
+

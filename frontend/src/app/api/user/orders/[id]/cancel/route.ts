@@ -1,11 +1,11 @@
 import { type NextRequest } from "next/server";
 import mongoose from "mongoose";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 import AuditLog from "@/models/AuditLog";
-import { ORDER_CANCEL_WINDOW_MS } from "@shared/constants";
+import { ORDER_CANCEL_WINDOW_MS } from "@stylemart/shared/constants";
 import {
   successResponse,
   errorResponse,
@@ -16,7 +16,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {

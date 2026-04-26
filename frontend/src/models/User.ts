@@ -5,9 +5,11 @@ export interface IUser extends Document {
   name: string;
   email: string;
   passwordHash?: string | null;
-  role: 'SUPER_ADMIN' | 'ADMIN' | 'CUSTOMER';
+  role: 'ADMIN' | 'CUSTOMER';
   status: 'ACTIVE' | 'SUSPENDED' | 'DELETED';
   phone?: string | null;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY' | null;
+  dob?: Date | null;
   avatarUrl?: string | null;
   avatarPublicId?: string | null;
   emailVerified: boolean;
@@ -21,9 +23,11 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true, minlength: 2, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String },
-    role: { type: String, enum: ['SUPER_ADMIN', 'ADMIN', 'CUSTOMER'], default: 'CUSTOMER' },
+    role: { type: String, enum: ['ADMIN', 'CUSTOMER'], default: 'CUSTOMER' },
     status: { type: String, enum: ['ACTIVE', 'SUSPENDED', 'DELETED'], default: 'ACTIVE' },
     phone: { type: String },
+    gender: { type: String, enum: ['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'] },
+    dob: { type: Date },
     avatarUrl: { type: String },
     avatarPublicId: { type: String },
     emailVerified: { type: Boolean, default: false },
@@ -32,9 +36,11 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-UserSchema.index({ email: 1 });
+// Delete the model if it exists to prevent schema caching issues during hot-reloads
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
 
-const User: Model<IUser> =
-  (mongoose.models.User as Model<IUser>) || mongoose.model<IUser>('User', UserSchema);
+const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
 
 export default User;

@@ -11,8 +11,7 @@ import {
 } from "@/lib/api-response";
 import { computeFinalPrice } from "@/lib/utils";
 import { CACHE_TTL, DEFAULT_PAGE_SIZE } from "@stylemart/shared/constants";
-import { rateLimiters } from "@backend/lib/ratelimit";
-import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
+import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
 
 export async function GET(request: NextRequest) {
   const ip =

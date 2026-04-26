@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { connectDB } from "../lib/mongoose";
-import Order from "../../frontend/src/models/Order";
-import Product from "../../frontend/src/models/Product";
-import AuditLog from "../../frontend/src/models/AuditLog";
-import { generateOrderNumber } from "../../shared/utils";
-import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "../../shared/constants";
+import Order from "@/models/Order";
+import Product from "@/models/Product";
+import AuditLog from "@/models/AuditLog";
+import { generateOrderNumber } from "@stylemart/shared/utils";
+import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@stylemart/shared/constants";
 
 export const orderService = {
   validateStock(cartItems: Array<{

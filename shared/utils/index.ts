@@ -4,16 +4,13 @@
 // Import via: import { ... } from "@stylemart/shared/utils"
 // ============================================================
 
-import { DEFAULT_PAGE_SIZE, FREE_SHIPPING_ABOVE, STANDARD_SHIPPING_CHARGE } from "./constants"; // relative import within shared
-
-// NOTE: re-export constants in utils for convenience
-export { formatCurrency, computeFinalPrice, generateOrderNumber, paginate, slugify };
+import { DEFAULT_PAGE_SIZE, FREE_SHIPPING_ABOVE, STANDARD_SHIPPING_CHARGE } from "../constants"; // relative import within shared
 
 /**
  * Format a number as an Indian Rupee currency string.
  * @example formatCurrency(1234.5) → "₹1,234.50"
  */
-function formatCurrency(amount: number, locale = "en-IN"): string {
+export function formatCurrency(amount: number, locale = "en-IN"): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "INR",
@@ -26,7 +23,7 @@ function formatCurrency(amount: number, locale = "en-IN"): string {
  * Compute the final customer-facing price from product pricing fields.
  * Formula: selling_price × (1 - discount%/100) × (1 + gst%/100)
  */
-function computeFinalPrice(
+export function computeFinalPrice(
   sellingPrice: number,
   gstPercent: number,
   discountPercent: number
@@ -40,7 +37,7 @@ function computeFinalPrice(
  * Generate a unique, human-readable order number.
  * Format: SM-YYYYMMDD-XXXXXXXX (8 random alphanumeric chars)
  */
-function generateOrderNumber(): string {
+export function generateOrderNumber(): string {
   const datePart = new Date()
     .toISOString()
     .slice(0, 10)
@@ -55,7 +52,7 @@ function generateOrderNumber(): string {
 /**
  * Compute MongoDB skip/limit from page and limit.
  */
-function paginate(
+export function paginate(
   page: number,
   limit: number = DEFAULT_PAGE_SIZE
 ): { skip: number; take: number } {
@@ -71,7 +68,7 @@ function paginate(
  * Convert a string to a URL-friendly slug.
  * @example slugify("Hello World! 123") → "hello-world-123"
  */
-function slugify(input: string): string {
+export function slugify(input: string): string {
   return input
     .toLowerCase()
     .trim()

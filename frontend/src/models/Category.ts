@@ -22,7 +22,7 @@ const CategorySchema = new Schema<ICategory>(
   { timestamps: true }
 );
 
-CategorySchema.index({ slug: 1 });
+
 
 const Category: Model<ICategory> =
   (mongoose.models.Category as Model<ICategory>) || mongoose.model<ICategory>('Category', CategorySchema);

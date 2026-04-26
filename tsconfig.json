@@ -2,7 +2,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@stylemart/types": ["shared/types/index.ts"]
+      "@/*": ["frontend/src/*"],
+      "@stylemart/types": ["shared/types/index.ts"],
+      "@stylemart/shared/constants": ["shared/constants/index.ts"],
+      "@stylemart/shared/utils": ["shared/utils/index.ts"],
+      "@stylemart/shared/lib/*": ["shared/lib/*"]
     },
     "composite": true,
     "declaration": true,
@@ -15,7 +19,8 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ESNext"
+    "target": "ESNext",
+    "jsx": "preserve"
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "backend/dist", "frontend/.next", "frontend/out", "__tests__"]
 }

@@ -1,6 +1,6 @@
 import { jwtVerify } from "jose";
 import { connectDB } from "../lib/mongoose";
-import User from "../../frontend/src/models/User";
+import User from "@/models/User";
 
 export type Role = "SUPER_ADMIN" | "ADMIN" | "CUSTOMER";
 

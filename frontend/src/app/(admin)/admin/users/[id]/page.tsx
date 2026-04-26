@@ -9,7 +9,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  role: "CUSTOMER" | "ADMIN" | "SUPER_ADMIN";
+  role: "CUSTOMER" | "ADMIN";
   status: "ACTIVE" | "SUSPENDED" | "DELETED";
   emailVerified: boolean;
   phone?: string;
@@ -125,27 +125,27 @@ export default function AdminUserDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
-            <p className="text-gray-600 mt-2">{user.email}</p>
+    <div className="space-y-6 relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 z-0"></div>
+        <div className="bg-card rounded-2xl shadow-lg border border-border relative z-10 overflow-hidden">
+          <div className="px-6 py-6 border-b border-border bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+            <h1 className="text-3xl font-bold text-foreground">{user.name}</h1>
+            <p className="text-muted-foreground mt-2">{user.email}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
-            <div className="bg-gray-50 p-4 rounded space-y-3">
+            <div className="bg-muted/30 p-4 rounded-xl space-y-3 border border-border/50">
               <div>
-                <p className="text-sm text-gray-600">User ID</p>
-                <p className="font-mono text-sm">{user._id}</p>
+                <p className="text-sm font-medium text-muted-foreground">User ID</p>
+                <p className="font-mono text-sm font-semibold text-foreground">{user._id}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Member Since</p>
-                <p className="text-sm">{new Date(user.createdAt).toLocaleDateString()}</p>
+                <p className="text-sm font-medium text-muted-foreground">Member Since</p>
+                <p className="text-sm font-semibold text-foreground">{new Date(user.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Email Verification</p>
-                <p className="text-sm">
+                <p className="text-sm font-medium text-muted-foreground">Email Verification</p>
+                <p className="text-sm font-semibold">
                   {user.emailVerified ? (
                     <span className="text-green-600">✓ Verified</span>
                   ) : (
@@ -155,12 +155,12 @@ export default function AdminUserDetailPage() {
               </div>
             </div>
 
-            <div className="border-t pt-6">
-              <h2 className="text-xl font-semibold mb-4">User Management</h2>
+            <div className="border-t border-border pt-6">
+              <h2 className="text-xl font-bold text-foreground mb-4">User Management</h2>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-semibold text-foreground mb-2">
                     Display Name
                   </label>
                   <input
@@ -168,68 +168,66 @@ export default function AdminUserDetailPage() {
                     name="name"
                     value={formData.name || ""}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-foreground"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-semibold text-foreground mb-2">
                     Role
                   </label>
                   <select
                     name="role"
                     value={formData.role || "CUSTOMER"}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-foreground"
                   >
                     <option value="CUSTOMER">Customer</option>
                     <option value="ADMIN">Admin</option>
-                    <option value="SUPER_ADMIN">Super Admin</option>
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Only SUPER_ADMIN can change roles
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Assign role carefully
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   Account Status
                 </label>
                 <select
                   name="status"
                   value={formData.status || "ACTIVE"}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-foreground"
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="SUSPENDED">Suspended</option>
                   <option value="DELETED">Deleted</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Suspended users cannot log in or make purchases
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-4 pt-6">
+            <div className="flex gap-4 pt-6 border-t border-border">
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
               <Link
                 href="/admin/users"
-                className="flex-1 px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 text-center"
+                className="flex-1 px-6 py-3 bg-muted text-muted-foreground font-bold rounded-xl hover:bg-muted/80 hover:text-foreground text-center transition-colors"
               >
                 Cancel
               </Link>
             </div>
           </form>
         </div>
-      </div>
     </div>
   );
 }

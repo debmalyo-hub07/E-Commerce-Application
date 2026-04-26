@@ -1,17 +1,17 @@
 import { Queue, Worker, Job } from "bullmq";
-import { ioRedis } from "../lib/redis";
+import { createIORedisConnection } from "../lib/redis";
 import { connectDB } from "../lib/mongoose";
-import Order from "../../frontend/src/models/Order";
-import User from "../../frontend/src/models/User";
+import Order from "@/models/Order";
+import User from "@/models/User";
 import { orderService } from "../services/order.service";
 import {
   PENDING_ORDER_EXPIRE_HOURS,
   SOFT_DELETE_PURGE_DAYS,
   QUEUE_NAMES,
-} from "../../shared/constants";
+} from "@stylemart/shared/constants";
 
 export const cleanupQueue = new Queue(QUEUE_NAMES.CLEANUP, {
-  connection: ioRedis,
+  connection: createIORedisConnection(),
   defaultJobOptions: {
     attempts: 2,
     removeOnComplete: true,
@@ -49,7 +49,7 @@ export const cleanupWorker = new Worker<CleanupJobData>(
       }
     }
   },
-  { connection: ioRedis, concurrency: 1 }
+  { connection: createIORedisConnection(), concurrency: 1 }
 );
 
 async function expireStaleOrders(): Promise<void> {

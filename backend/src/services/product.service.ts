@@ -1,9 +1,9 @@
 import { connectDB } from "../lib/mongoose";
-import Product from "../../frontend/src/models/Product";
-import AuditLog from "../../frontend/src/models/AuditLog";
+import Product from "@/models/Product";
+import AuditLog from "@/models/AuditLog";
 import { upstashRedis } from "../lib/redis";
-import { computeFinalPrice, productCacheKey, slugify } from "../../shared/utils";
-import { CACHE_TTL } from "../../shared/constants";
+import { computeFinalPrice, productCacheKey, slugify } from "@stylemart/shared/utils";
+import { CACHE_TTL } from "@stylemart/shared/constants";
 
 export const productService = {
   computeFinalPrice(

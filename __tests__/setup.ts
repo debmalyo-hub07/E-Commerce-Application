@@ -17,6 +17,6 @@ global.console = {
 // Increase Jest timeout for database operations
 jest.setTimeout(10000);
 
-// Set test environment variables
-process.env.NODE_ENV = "test";
+// Set test environment variables (use Object.defineProperty for NODE_ENV which is readonly)
+Object.defineProperty(process.env, "NODE_ENV", { value: "test", writable: true });
 process.env.NEXTAUTH_SECRET = "test-secret-key-for-testing-only";

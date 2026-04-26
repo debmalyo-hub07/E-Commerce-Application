@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../lib/mongoose";
-import AuditLog from "../../frontend/src/models/AuditLog";
+import AuditLog from "@/models/AuditLog";
 
 interface RouteError extends Error {
   error_code?: string;

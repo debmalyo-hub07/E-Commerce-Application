@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import User from "@/models/User";
 import AuditLog from "@/models/AuditLog";
@@ -13,17 +13,18 @@ import {
 import { z } from "zod";
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 const updateUserSchema = z.object({
-  role: z.enum(["CUSTOMER", "ADMIN", "SUPER_ADMIN"]).optional(),
+  role: z.enum(["CUSTOMER", "ADMIN"]).optional(),
   status: z.enum(["ACTIVE", "SUSPENDED", "DELETED"]).optional(),
   name: z.string().min(2).optional(),
 });
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -66,3 +67,4 @@ export async function GET(request: NextRequest) {
     return errorResponse("Failed to fetch users", "INTERNAL_ERROR", 500);
   }
 }
+

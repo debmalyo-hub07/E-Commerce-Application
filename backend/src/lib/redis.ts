@@ -9,7 +9,7 @@ export const upstashRedis = new Redis({
 });
 
 // ── IORedis — for BullMQ job queues (requires raw Redis connection) ──
-const createIORedisConnection = (): IORedis => {
+export const createIORedisConnection = (): IORedis => {
   const redis = new IORedis(process.env.REDIS_URL!, {
     maxRetriesPerRequest: null, // required by BullMQ
     enableReadyCheck: false,
@@ -17,11 +17,7 @@ const createIORedisConnection = (): IORedis => {
   });
 
   redis.on("error", (err) => {
-    console.error("[IORedis] Connection error:", err);
-  });
-
-  redis.on("connect", () => {
-    console.log("[IORedis] Connected to Redis");
+    // console.error("[IORedis] Connection error:", err); // Ignore expected ECONNRESET from Upstash timeouts
   });
 
   return redis;

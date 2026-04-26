@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Address from "@/models/Address";
 import {
@@ -14,7 +14,8 @@ interface RouteContext {
 }
 
 export async function GET(_req: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: _req, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {
@@ -31,7 +32,8 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {
@@ -72,7 +74,8 @@ export async function PUT(request: NextRequest, ctx: RouteContext) {
 }
 
 export async function DELETE(_req: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: _req, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {

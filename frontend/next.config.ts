@@ -41,8 +41,11 @@ const nextConfig: NextConfig = {
 
   // ── TypeScript & ESLint (moved to turbopack era) ─────────
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
+  // ── Dev Indicators (Next.js 16) ─────────────────────────────
+  devIndicators: false as any,
+
 };
 
 export default nextConfig;

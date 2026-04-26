@@ -4,8 +4,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { z } from "zod";
-import { rateLimiters } from "@backend/lib/ratelimit";
-import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
+import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -35,25 +34,54 @@ export async function POST(request: NextRequest) {
     const { name, email, password } = parsed.data;
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return errorResponse("User with this email already exists", "EMAIL_ALREADY_EXISTS", 409);
-    }
-
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const user = await User.create({
-      name,
+    let user;
+
+    if (existingUser) {
+      if (!existingUser.passwordHash) {
+        // User created via Google login; allow them to set a password
+        existingUser.passwordHash = passwordHash;
+        await existingUser.save();
+        user = existingUser;
+      } else {
+        return errorResponse("User with this email already exists", "EMAIL_ALREADY_EXISTS", 409);
+      }
+    } else {
+      user = await User.create({
+        name,
+        email,
+        passwordHash,
+        role: "CUSTOMER",
+        emailVerified: false,
+      });
+    }
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store OTP in database
+    const OTP = (await import("@/models/OTP")).default;
+    await OTP.deleteMany({ email }); // Clear existing OTPs for this email
+    await OTP.create({
       email,
-      passwordHash,
-      role: "CUSTOMER",
+      otp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 mins
     });
+
+    // Send OTP via email
+    const { sendOTP } = await import("@/lib/mailer");
+    const emailSent = await sendOTP(email, otp);
+
+    if (!emailSent) {
+      return errorResponse("Failed to send OTP email", "EMAIL_SEND_FAILED", 500);
+    }
 
     return successResponse(
       {
-        id: user._id.toString(),
-        name: user.name,
+        requiresOtp: true,
         email: user.email,
-        role: user.role,
+        message: "OTP sent to your email",
       },
       201
     );

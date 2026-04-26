@@ -1,11 +1,11 @@
 import { Queue, Worker, Job } from "bullmq";
-import { ioRedis } from "../lib/redis";
+import { createIORedisConnection } from "../lib/redis";
 import { connectDB } from "../lib/mongoose";
-import Product from "../../frontend/src/models/Product";
-import User from "../../frontend/src/models/User";
+import Product from "@/models/Product";
+import User from "@/models/User";
 import { emailService } from "../services/email.service";
 import { notificationService } from "../services/notification.service";
-import { LOW_STOCK_THRESHOLD, QUEUE_NAMES } from "../../shared/constants";
+import { LOW_STOCK_THRESHOLD, QUEUE_NAMES } from "@stylemart/shared/constants";
 
 interface StockAlertJobData {
   productId: string;
@@ -14,7 +14,7 @@ interface StockAlertJobData {
 }
 
 export const stockAlertQueue = new Queue(QUEUE_NAMES.STOCK_ALERT, {
-  connection: ioRedis,
+  connection: createIORedisConnection(),
   defaultJobOptions: {
     attempts: 2,
     backoff: { type: "exponential", delay: 2000 },
@@ -64,7 +64,7 @@ export const stockAlertWorker = new Worker<StockAlertJobData>(
     const message = `Low stock alert: "${productName}" has only ${currentStock} unit(s) remaining.`;
 
     await Promise.allSettled(
-      admins.map((admin) =>
+      admins.map((admin: typeof admins[0]) =>
         notificationService.create({
           userId: admin._id.toString(),
           type: "system",
@@ -87,7 +87,7 @@ export const stockAlertWorker = new Worker<StockAlertJobData>(
 
     console.log(`[StockAlertQueue] Alert sent for product: ${productName} (stock: ${currentStock})`);
   },
-  { connection: ioRedis, concurrency: 2 }
+  { connection: createIORedisConnection(), concurrency: 2 }
 );
 
 stockAlertWorker.on("error", (err) => {

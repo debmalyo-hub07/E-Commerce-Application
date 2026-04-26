@@ -21,8 +21,25 @@ export default function cloudinaryLoader({
 }: CloudinaryLoaderParams): string {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-  // If src is already a full URL (e.g. Unsplash, external CDN), return as-is
+  // If src is already a full URL (e.g. Unsplash, external CDN), handle sizing
   if (src.startsWith("http://") || src.startsWith("https://")) {
+    try {
+      const url = new URL(src);
+      // specific handling for unsplash to ensure good quality
+      if (src.includes("images.unsplash.com")) {
+        url.searchParams.set("w", width.toString());
+        url.searchParams.set("q", quality.toString());
+        url.searchParams.set("auto", "format");
+        url.searchParams.set("fit", "crop");
+      }
+      return url.toString();
+    } catch {
+      return src;
+    }
+  }
+
+  // If src is a local absolute path, use it as is without cloudinary transformations
+  if (src.startsWith("/")) {
     return src;
   }
 

@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Coupon from "@/models/Coupon";
 import AuditLog from "@/models/AuditLog";
@@ -13,7 +13,7 @@ import {
 import { z } from "zod";
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 const createCouponSchema = z.object({
@@ -28,7 +28,8 @@ const createCouponSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -65,7 +66,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -110,3 +112,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

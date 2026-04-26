@@ -1,12 +1,12 @@
 import { Queue, Worker, Job, QueueEvents } from "bullmq";
-import { ioRedis } from "../lib/redis";
+import { createIORedisConnection } from "../lib/redis";
 import { emailService } from "../services/email.service";
 import { connectDB } from "../lib/mongoose";
-import AuditLog from "../../frontend/src/models/AuditLog";
-import { EMAIL_JOBS, QUEUE_NAMES } from "../../shared/constants";
+import AuditLog from "@/models/AuditLog";
+import { EMAIL_JOBS, QUEUE_NAMES } from "@stylemart/shared/constants";
 
 export const emailQueue = new Queue(QUEUE_NAMES.EMAIL, {
-  connection: ioRedis,
+  connection: createIORedisConnection(),
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -103,12 +103,12 @@ export const emailWorker = new Worker<EmailJobData>(
     console.log(`[EmailQueue] Sent ${type} email to ${(payload as { to: string }).to}`);
   },
   {
-    connection: ioRedis,
+    connection: createIORedisConnection(),
     concurrency: 5,
   }
 );
 
-const emailQueueEvents = new QueueEvents(QUEUE_NAMES.EMAIL, { connection: ioRedis });
+const emailQueueEvents = new QueueEvents(QUEUE_NAMES.EMAIL, { connection: createIORedisConnection() });
 
 emailQueueEvents.on("failed", async ({ jobId, failedReason }) => {
   console.error(`[EmailQueue] Job ${jobId} failed: ${failedReason}`);

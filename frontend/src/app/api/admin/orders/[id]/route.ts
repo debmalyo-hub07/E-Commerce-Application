@@ -1,12 +1,11 @@
 import { type NextRequest } from "next/server";
 import mongoose from "mongoose";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import AuditLog from "@/models/AuditLog";
 import User from "@/models/User";
-import { enqueueShippingUpdateEmail } from "@backend/jobs/email.queue";
 import {
   successResponse,
   errorResponse,
@@ -14,9 +13,8 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/api-response";
-import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@shared/constants";
-import { rateLimiters } from "@backend/lib/ratelimit";
-import { applyRateLimit } from "@backend/middleware/ratelimit.middleware";
+import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@stylemart/shared/constants";
+import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
 
 interface RouteContext { params: Promise<{ id: string }>; }
 
@@ -25,7 +23,8 @@ function isAdmin(role: string) {
 }
 
 export async function GET(_req: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: _req, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -56,7 +55,8 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 }
 
 export async function PATCH(request: NextRequest, ctx: RouteContext) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
   if (!isAdmin(token.role as string)) return forbiddenResponse();
 
@@ -130,6 +130,7 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       const user = await User.findById(order.userId);
       if (user && (orderStatus === "SHIPPED" || orderStatus === "DELIVERED")) {
         try {
+          const { enqueueShippingUpdateEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
           await enqueueShippingUpdateEmail({
             to: user.email,
             customerName: user.name,

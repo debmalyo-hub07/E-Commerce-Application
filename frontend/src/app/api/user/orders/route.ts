@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import {
@@ -10,7 +10,8 @@ import {
 } from "@/lib/api-response";
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET! });
+  const session = await auth();
+  const token = session?.user;
   if (!token) return unauthorizedResponse();
 
   try {
@@ -40,3 +41,4 @@ export async function GET(request: NextRequest) {
     return errorResponse("Failed to fetch orders", "INTERNAL_ERROR", 500);
   }
 }
+

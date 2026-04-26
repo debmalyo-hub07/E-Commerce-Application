@@ -40,6 +40,12 @@ Thumbs.db
 *.swp
 *.swo
 
+# AI/Model specific
+.claude/
+.planning/
+.brain/
+.gemini/
+*.md.tmp
 
 # TypeScript
 *.tsbuildinfo
