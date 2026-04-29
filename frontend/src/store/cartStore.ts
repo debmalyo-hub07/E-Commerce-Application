@@ -159,7 +159,7 @@ export const useCartStore = create<CartState>()(
         hydrateFromServer: (items) => set({ items }),
       })),
       {
-        name: "stylemart-cart",
+        name: "nexmart-cart",
         partialize: (state) => ({
           items: state.items,
           couponCode: state.couponCode,

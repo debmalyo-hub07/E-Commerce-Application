@@ -4,7 +4,7 @@ import User from "@/models/User";
 import OTP from "@/models/OTP";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { z } from "zod";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
 
 const verifySchema = z.object({
   email: z.string().email(),

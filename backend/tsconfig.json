@@ -21,10 +21,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["../frontend/src/*"],
-      "@stylemart/types": ["../shared/types/index.ts"],
-      "@stylemart/shared/constants": ["../shared/constants/index.ts"],
-      "@stylemart/shared/utils": ["../shared/utils/index.ts"],
-      "@stylemart/shared/lib/*": ["../shared/lib/*"]
+      "@nexmart/types": ["../shared/types/index.ts"],
+      "@nexmart/shared/constants": ["../shared/constants/index.ts"],
+      "@nexmart/shared/utils": ["../shared/utils/index.ts"],
+      "@nexmart/shared/lib/*": ["../shared/lib/*"]
     }
   },
   "include": ["src/**/*"],

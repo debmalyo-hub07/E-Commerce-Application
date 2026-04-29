@@ -12,8 +12,8 @@ import {
   buildPaginationMeta,
 } from "@/lib/api-response";
 import { z } from "zod";
-import { slugify } from "@stylemart/shared/utils";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { slugify } from "@nexmart/shared/utils";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
 
 function isAdmin(role: string) {
   return role === "ADMIN";

@@ -20,10 +20,11 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@stylemart/types": ["../shared/types"],
-      "@stylemart/shared/constants": ["../shared/constants"],
-      "@stylemart/shared/utils": ["../shared/utils"],
-      "@stylemart/shared/lib/*": ["../shared/lib/*"]
+      "@backend/*": ["../backend/src/*"],
+      "@nexmart/types": ["../shared/types"],
+      "@nexmart/shared/constants": ["../shared/constants"],
+      "@nexmart/shared/utils": ["../shared/utils"],
+      "@nexmart/shared/lib/*": ["../shared/lib/*"]
     }
   },
   "include": [

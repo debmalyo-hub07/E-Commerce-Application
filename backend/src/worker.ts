@@ -9,7 +9,7 @@ import { notificationWorker } from "./jobs/notification.queue";
 import { stockAlertWorker } from "./jobs/stock-alert.queue";
 import { cleanupWorker, scheduleDailyCleanup } from "./jobs/cleanup.queue";
 
-console.log("🚀 StyleMart Backend Worker starting...");
+console.log("🚀 NexMart Backend Worker starting...");
 
 // Start all workers
 const workers = [emailWorker, notificationWorker, stockAlertWorker, cleanupWorker];

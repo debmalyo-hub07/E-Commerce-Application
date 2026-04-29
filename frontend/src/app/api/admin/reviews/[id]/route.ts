@@ -17,7 +17,7 @@ interface RouteContext {
 }
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 const approvalSchema = z.object({

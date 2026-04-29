@@ -13,6 +13,7 @@ import { useCart } from "@/hooks/useCart";
 import { useUIStore } from "@/store/uiStore";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
+import { useFetchWishlist } from "@/hooks/useWishlist";
 
 const categories = [
   { name: "Electronics", slug: "electronics", sub: ["Smartphones", "Laptops", "Audio", "Cameras", "Wearables"] },
@@ -59,6 +60,9 @@ export function Navbar() {
   });
 
   const isAdmin = session?.user?.role === "ADMIN";
+  
+  // Hydrate wishlist data for logged-in users globally
+  useFetchWishlist(!!session?.user);
 
   return (
     <>
@@ -72,19 +76,19 @@ export function Navbar() {
 
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex items-center justify-between h-20 gap-4">
+          <div className="flex items-center justify-between h-20 gap-2">
             {/* Left side: Logo */}
-            <div className="flex items-center gap-8 shrink-0">
+            <div className="flex items-center gap-4 shrink-0">
               <Link href="/" className="flex items-center gap-2 group">
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: [0, -10, 10, 0] }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all duration-300"
                 >
-                  <span className="text-white font-extrabold text-lg tracking-tighter">SM</span>
+                  <span className="text-white font-extrabold text-lg tracking-tighter">NM</span>
                 </motion.div>
                 <span className="font-outfit font-black text-2xl tracking-tight hidden sm:block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 group-hover:to-primary transition-all duration-300">
-                  StyleMart
+                  NexMart
                 </span>
               </Link>
 
@@ -99,7 +103,7 @@ export function Navbar() {
                   >
                     <Link
                       href={`/products?category=${cat.slug}`}
-                      className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-bold text-foreground/70 hover:text-primary transition-all duration-300 whitespace-nowrap"
+                      className="flex items-center gap-1 px-2 py-2 rounded-xl text-sm font-bold text-foreground/70 hover:text-primary transition-all duration-300 whitespace-nowrap"
                     >
                       <span>{cat.name}</span>
                       <ChevronDown className="w-3 h-3 opacity-40 group-hover:rotate-180 transition-transform" />
@@ -139,7 +143,7 @@ export function Navbar() {
             </div>
 
             {/* Right side: Actions */}
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {/* Search Bar */}
               <div className="relative hidden md:flex items-center">
               <AnimatePresence>
@@ -313,16 +317,16 @@ export function Navbar() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0 mr-2 sm:mr-0">
                   <Link
                     href="/login"
-                    className="hidden lg:block px-3 py-2 text-sm font-bold text-foreground/80 hover:text-primary transition-all"
+                    className="hidden lg:block px-2 py-2 text-sm font-bold text-foreground/80 hover:text-primary transition-all"
                   >
                     Log In
                   </Link>
                   <Link
                     href="/register"
-                    className="px-5 py-2.5 text-xs sm:text-sm font-black bg-gradient-to-r from-violet-600 to-primary text-white rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all whitespace-nowrap"
+                    className="hidden lg:flex px-4 py-2 text-sm font-black bg-gradient-to-r from-violet-600 to-primary text-white rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all whitespace-nowrap"
                   >
                     Sign Up
                   </Link>

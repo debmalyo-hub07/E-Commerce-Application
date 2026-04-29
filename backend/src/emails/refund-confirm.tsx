@@ -15,7 +15,7 @@ export function RefundConfirmEmail({ customerName, orderNumber, refundAmount, re
       <Body style={{ backgroundColor: "#f6f9fc", fontFamily: "Inter, Arial, sans-serif" }}>
         <Container style={{ maxWidth: "600px", margin: "0 auto", backgroundColor: "#fff", borderRadius: "12px", overflow: "hidden" }}>
           <Section style={{ background: "linear-gradient(135deg, #10b981, #059669)", padding: "32px 40px", textAlign: "center" }}>
-            <Heading style={{ color: "#fff", fontSize: "28px", margin: "0 0 4px" }}>StyleMart</Heading>
+            <Heading style={{ color: "#fff", fontSize: "28px", margin: "0 0 4px" }}>NexMart</Heading>
             <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: "16px", margin: 0 }}>Refund Initiated ✓</Text>
           </Section>
           <Section style={{ padding: "32px 40px" }}>
@@ -38,7 +38,7 @@ export function RefundConfirmEmail({ customerName, orderNumber, refundAmount, re
             </Section>
           </Section>
           <Section style={{ backgroundColor: "#f6f9fc", padding: "24px 40px", textAlign: "center" }}>
-            <Text style={{ fontSize: "12px", color: "#9ca3af", margin: "4px 0" }}>© {new Date().getFullYear()} StyleMart. All rights reserved.</Text>
+            <Text style={{ fontSize: "12px", color: "#9ca3af", margin: "4px 0" }}>© {new Date().getFullYear()} NexMart. All rights reserved.</Text>
           </Section>
         </Container>
       </Body>

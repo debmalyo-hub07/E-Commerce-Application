@@ -10,8 +10,8 @@ import {
   buildPaginationMeta,
 } from "@/lib/api-response";
 import { computeFinalPrice } from "@/lib/utils";
-import { CACHE_TTL, DEFAULT_PAGE_SIZE } from "@stylemart/shared/constants";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { CACHE_TTL, DEFAULT_PAGE_SIZE } from "@nexmart/shared/constants";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
 
 export async function GET(request: NextRequest) {
   const ip =

@@ -79,8 +79,7 @@ export default function AdminUsersPage() {
 
   const getRoleBadge = (role: string) => {
     switch(role) {
-      case "SUPER_ADMIN":
-        return <span className="flex items-center gap-1.5 w-max px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold bg-red-100 text-red-700 border border-red-200"><ShieldAlert className="w-3 h-3" /> Super Admin</span>;
+
       case "ADMIN":
         return <span className="flex items-center gap-1.5 w-max px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold bg-purple-100 text-purple-700 border border-purple-200"><ShieldCheck className="w-3 h-3" /> Admin</span>;
       default:

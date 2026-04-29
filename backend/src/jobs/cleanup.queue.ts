@@ -8,7 +8,7 @@ import {
   PENDING_ORDER_EXPIRE_HOURS,
   SOFT_DELETE_PURGE_DAYS,
   QUEUE_NAMES,
-} from "@stylemart/shared/constants";
+} from "@nexmart/shared/constants";
 
 export const cleanupQueue = new Queue(QUEUE_NAMES.CLEANUP, {
   connection: createIORedisConnection(),

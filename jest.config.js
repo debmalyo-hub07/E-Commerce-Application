@@ -7,7 +7,7 @@ module.exports = {
     "^@/(.*)$": "<rootDir>/frontend/src/$1",
     "^@backend/(.*)$": "<rootDir>/backend/src/$1",
     "^@shared/(.*)$": "<rootDir>/shared/$1",
-    "^@stylemart/shared/(.*)$": "<rootDir>/shared/$1",
+    "^@nexmart/shared/(.*)$": "<rootDir>/shared/$1",
   },
   collectCoverageFrom: [
     "frontend/src/**/*.{ts,tsx}",

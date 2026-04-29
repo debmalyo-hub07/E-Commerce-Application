@@ -5,7 +5,7 @@ import Category from "@/models/Category";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connectDB();
-  const baseUrl = process.env.APP_URL ?? "https://stylemart.in";
+  const baseUrl = process.env.APP_URL ?? "https://NexMart.in";
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${baseUrl}`, lastModified: new Date(), changeFrequency: "daily", priority: 1 },

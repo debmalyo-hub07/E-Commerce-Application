@@ -41,7 +41,7 @@ async function main() {
     console.log(`Uploading ${file}...`);
     try {
       const result = await cloudinary.uploader.upload(path.join(__dirname, "public/images", file), {
-        folder: "stylemart/products",
+        folder: "nexmart/products",
       });
       uploadedUrls.push(result.secure_url);
       console.log(`Uploaded ${file} -> ${result.secure_url}`);
@@ -64,7 +64,7 @@ async function main() {
       const randomUrl = uploadedUrls[i % uploadedUrls.length];
       product.images = [{
         url: randomUrl,
-        publicId: `stylemart/products/${randomUrl.split("/").pop()?.split(".")[0]}`,
+        publicId: `nexmart/products/${randomUrl.split("/").pop()?.split(".")[0]}`,
         isPrimary: true,
         displayOrder: 0
       }];

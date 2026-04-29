@@ -2,7 +2,7 @@ import { jwtVerify } from "jose";
 import { connectDB } from "../lib/mongoose";
 import User from "@/models/User";
 
-export type Role = "SUPER_ADMIN" | "ADMIN" | "CUSTOMER";
+export type Role = "ADMIN" | "CUSTOMER";
 
 interface JWTPayload {
   id: string;

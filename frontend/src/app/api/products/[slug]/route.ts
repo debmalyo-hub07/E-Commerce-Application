@@ -9,7 +9,7 @@ import {
   errorResponse,
 } from "@/lib/api-response";
 import { computeFinalPrice } from "@/lib/utils";
-import { CACHE_TTL } from "@stylemart/shared/constants";
+import { CACHE_TTL } from "@nexmart/shared/constants";
 
 interface RouteContext {
   params: Promise<{ slug: string }>;

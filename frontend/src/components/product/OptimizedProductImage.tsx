@@ -75,7 +75,7 @@ export function OptimizedProductImage({
           className={`object-cover transition-opacity duration-300 ${
             isLoading ? "opacity-0" : "opacity-100"
           }`}
-          onLoadingComplete={handleLoadingComplete}
+          onLoad={handleLoadingComplete}
           onError={handleError}
           priority={false}
         />

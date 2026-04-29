@@ -27,7 +27,7 @@ export function OrderConfirmEmail({
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Heading style={logo}>StyleMart</Heading>
+            <Heading style={logo}>NexMart</Heading>
             <Text style={tagline}>Order Confirmed ✓</Text>
           </Section>
 
@@ -94,13 +94,13 @@ export function OrderConfirmEmail({
 
             <Text style={paragraph}>
               If you have any questions, reply to this email or contact us at{" "}
-              <a href="mailto:support@stylemart.in">support@stylemart.in</a>
+              <a href="mailto:support@NexMart.in">support@NexMart.in</a>
             </Text>
           </Section>
 
           {/* Footer */}
           <Section style={footer}>
-            <Text style={footerText}>© {new Date().getFullYear()} StyleMart. All rights reserved.</Text>
+            <Text style={footerText}>© {new Date().getFullYear()} NexMart. All rights reserved.</Text>
             <Text style={footerText}>
               <a href={`${process.env.APP_URL}/privacy-policy`} style={footerLink}>Privacy Policy</a>
               {" · "}

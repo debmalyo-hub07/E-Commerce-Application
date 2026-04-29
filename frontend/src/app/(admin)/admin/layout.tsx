@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <ShieldCheck className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-blue-100 font-medium tracking-wider uppercase">StyleMart Admin</p>
+                  <p className="text-xs text-blue-100 font-medium tracking-wider uppercase">NexMart Admin</p>
                   <p className="text-base font-bold text-white truncate max-w-[160px]">
                     {session?.user?.name || "Administrator"}
                   </p>

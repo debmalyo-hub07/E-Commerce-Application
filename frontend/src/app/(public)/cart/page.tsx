@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
-import { formatCurrency } from "@stylemart/shared/utils";
+import { formatCurrency } from "@nexmart/shared/utils";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, shipping, total, couponCode, couponDiscount, removeCoupon } = useCartStore();

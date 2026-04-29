@@ -134,6 +134,8 @@ export default function ProductForm() {
     setFormData((prev) => ({ ...prev, slug }));
   };
 
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   const handleAddImage = () => {
     if (!newImageUrl.trim()) return;
     try {
@@ -154,6 +156,46 @@ export default function ProductForm() {
     } catch {
       setError("Please enter a valid image URL (e.g. https://...)");
       setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: form
+      });
+      
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Upload failed");
+      
+      setFormData(prev => ({
+        ...prev,
+        images: [
+          ...prev.images,
+          {
+            url: data.data.url,
+            publicId: data.data.publicId,
+            isPrimary: prev.images.length === 0,
+            displayOrder: prev.images.length
+          }
+        ]
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setUploadingImage(false);
+      // Reset input
+      e.target.value = "";
     }
   };
 
@@ -523,17 +565,32 @@ export default function ProductForm() {
             </div>
             <div className="p-6 space-y-6">
               
-              <div className="flex gap-2">
-                <input 
-                  type="url" 
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  placeholder="https://image-url.com/img.jpg"
-                  className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
-                />
-                <Button type="button" onClick={handleAddImage} size="icon" className="shrink-0 rounded-lg">
-                  <Plus className="w-4 h-4" />
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1 flex gap-2">
+                  <input 
+                    type="url" 
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    placeholder="https://image-url.com/img.jpg"
+                    className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                  <Button type="button" onClick={handleAddImage} size="icon" className="shrink-0 rounded-lg">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground hidden sm:block">or</span>
+                  <label className="flex items-center justify-center cursor-pointer bg-muted hover:bg-muted/80 text-foreground text-sm font-medium px-4 py-2 rounded-lg border border-border transition-colors h-10 w-full sm:w-auto whitespace-nowrap">
+                    {uploadingImage ? "Uploading..." : "Upload File"}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleFileUpload} 
+                      disabled={uploadingImage}
+                    />
+                  </label>
+                </div>
               </div>
 
               {formData.images.length > 0 ? (

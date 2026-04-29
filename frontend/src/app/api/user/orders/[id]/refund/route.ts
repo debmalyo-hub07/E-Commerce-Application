@@ -6,6 +6,7 @@ import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import AuditLog from "@/models/AuditLog";
 import User from "@/models/User";
+import { enqueueRefundEmail } from "@backend/jobs/email.queue";
 import {
   successResponse,
   errorResponse,
@@ -102,7 +103,6 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
       const user = await User.findById(token.id);
       if (user) {
         try {
-          const { enqueueRefundEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
           await enqueueRefundEmail({
             to: user.email,
             customerName: user.name,

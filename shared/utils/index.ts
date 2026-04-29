@@ -1,7 +1,7 @@
 // ============================================================
 // Shared Pure Utility Functions
 // No side effects, no HTTP, no DB — pure transformations only.
-// Import via: import { ... } from "@stylemart/shared/utils"
+// Import via: import { ... } from "@nexmart/shared/utils"
 // ============================================================
 
 import { DEFAULT_PAGE_SIZE, FREE_SHIPPING_ABOVE, STANDARD_SHIPPING_CHARGE } from "../constants"; // relative import within shared

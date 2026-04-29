@@ -1,10 +1,10 @@
-# 🛍️ StyleMart - Premium E-Commerce Ecosystem
+# 🛍️ NexMart - Premium E-Commerce Ecosystem
 
-![StyleMart Banner](./stylemart_banner.png)
+![NexMart Banner](./nexmart_banner.png)
 
 ## ✨ Overview
 
-**StyleMart** is a state-of-the-art, full-stack e-commerce solution designed for modern businesses. Built with a focus on high performance, premium aesthetics, and robust scalability, StyleMart delivers a seamless shopping experience for customers and a powerful management interface for administrators.
+**NexMart** is a state-of-the-art, full-stack e-commerce solution designed for modern businesses. Built with a focus on high performance, premium aesthetics, and robust scalability, NexMart delivers a seamless shopping experience for customers and a powerful management interface for administrators.
 
 > [!IMPORTANT]
 > This project has undergone a massive UI/UX overhaul, featuring glassmorphism design, smooth 3D animations, and a completely restructured administrative backend.
@@ -62,8 +62,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/debmalyo-hub07/E-Commerce-Application.git
-   cd E-Commerce-Application
+   git clone https://github.com/debmalyo-hub07/NexMart.git
+   cd NexMart
    ```
 
 2. **Setup Backend**

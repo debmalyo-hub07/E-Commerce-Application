@@ -1,13 +1,12 @@
 // ============================================================
 // Shared TypeScript Interfaces & Enums
 // Used by both frontend and backend workspaces.
-// Import via: import { ... } from "@stylemart/shared/types"
+// Import via: import { ... } from "@nexmart/shared/types"
 // ============================================================
 
 // ── Enums ────────────────────────────────────────────────────
 
 export enum UserRole {
-  SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
   CUSTOMER = "CUSTOMER",
 }

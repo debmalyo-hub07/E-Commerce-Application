@@ -2,8 +2,8 @@ import { connectDB } from "../lib/mongoose";
 import Product from "@/models/Product";
 import AuditLog from "@/models/AuditLog";
 import { upstashRedis } from "../lib/redis";
-import { computeFinalPrice, productCacheKey, slugify } from "@stylemart/shared/utils";
-import { CACHE_TTL } from "@stylemart/shared/constants";
+import { computeFinalPrice, productCacheKey, slugify } from "@nexmart/shared/utils";
+import { CACHE_TTL } from "@nexmart/shared/constants";
 
 export const productService = {
   computeFinalPrice(

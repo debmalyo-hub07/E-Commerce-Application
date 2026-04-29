@@ -4,7 +4,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { z } from "zod";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
 
 const registerSchema = z.object({
   name: z.string().min(2),

@@ -15,7 +15,7 @@ async function seed() {
   await mongoose.connect(MONGODB_URI);
   console.log('Connected to MongoDB');
 
-  // SUPER_ADMIN
+  // ADMIN
   const hash = await bcrypt.hash('SuperAdmin@123', 12);
   await User.findOneAndUpdate(
     { email: 'superadmin@store.com' },
@@ -23,13 +23,13 @@ async function seed() {
       name: 'Super Admin',
       email: 'superadmin@store.com',
       passwordHash: hash,
-      role: 'SUPER_ADMIN',
+      role: 'ADMIN',
       emailVerified: true,
       status: 'ACTIVE',
     },
     { upsert: true, new: true }
   );
-  console.log('SUPER_ADMIN user seeded');
+  console.log('ADMIN user seeded');
 
   // Sample categories
   const categories = ['Electronics', 'Fashion', 'Home & Kitchen', 'Sports', 'Books'];

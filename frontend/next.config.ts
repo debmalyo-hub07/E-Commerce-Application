@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
   },
 
   // ── Server External Packages (Next.js 15+) ───────────────
-  serverExternalPackages: ["mongoose", "bcryptjs", "nodemailer"],
+  serverExternalPackages: ["mongoose", "bcryptjs", "nodemailer", "@react-pdf/renderer"],
 
   // ── Turbopack config (suppresses webpack/turbopack mismatch warning) ──
   turbopack: {},

@@ -6,7 +6,7 @@ import Review from "@/models/Review";
 import { ProductCard } from "@/components/product/ProductCard";
 
 export const metadata: Metadata = {
-  title: "Products | StyleMart",
+  title: "Products | NexMart",
   description: "Browse our entire collection of premium products.",
 };
 

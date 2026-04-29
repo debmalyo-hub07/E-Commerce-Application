@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const primaryImage = product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
   return {
     title: product.name,
-    description: product.description || `Buy ${product.name} at StyleMart`,
+    description: product.description || `Buy ${product.name} at NexMart`,
     openGraph: {
       images: primaryImage?.url ? [primaryImage.url] : [],
     },

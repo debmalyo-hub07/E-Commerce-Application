@@ -15,7 +15,7 @@ export const cloudinaryService = {
   ): Promise<{ url: string; publicId: string }> {
     return new Promise((resolve, reject) => {
       const uploadOptions: UploadApiOptions = {
-        folder: options.folder ?? "stylemart/products",
+        folder: options.folder ?? "nexmart/products",
         public_id: options.publicId,
         transformation: options.transformation ?? [
           { quality: "auto:best", fetch_format: "auto" },
@@ -99,7 +99,7 @@ export const cloudinaryService = {
     userId: string
   ): Promise<{ url: string; publicId: string }> {
     return cloudinaryService.uploadImage(source, {
-      folder: "stylemart/avatars",
+      folder: "nexmart/avatars",
       publicId: `avatar_${userId}`,
       transformation: [
         { width: 200, height: 200, crop: "fill", gravity: "face" },

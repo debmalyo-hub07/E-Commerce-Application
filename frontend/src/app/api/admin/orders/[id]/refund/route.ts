@@ -18,7 +18,7 @@ import {
 interface RouteContext { params: Promise<{ id: string }>; }
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 export async function POST(request: NextRequest, ctx: RouteContext) {

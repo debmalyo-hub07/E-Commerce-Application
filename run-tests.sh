@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🚀 StyleMart E-Commerce - Comprehensive Test Suite"
+echo "🚀 NexMart E-Commerce - Comprehensive Test Suite"
 echo "=================================================="
 echo ""
 

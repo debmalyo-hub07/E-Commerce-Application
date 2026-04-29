@@ -36,11 +36,7 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-// Delete the model if it exists to prevent schema caching issues during hot-reloads
-if (mongoose.models.User) {
-  delete mongoose.models.User;
-}
-
-const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
+const User: Model<IUser> =
+  (mongoose.models.User as Model<IUser>) || mongoose.model<IUser>('User', UserSchema);
 
 export default User;

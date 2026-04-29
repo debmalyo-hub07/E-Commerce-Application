@@ -5,7 +5,7 @@ import Product from "@/models/Product";
 import User from "@/models/User";
 import { emailService } from "../services/email.service";
 import { notificationService } from "../services/notification.service";
-import { LOW_STOCK_THRESHOLD, QUEUE_NAMES } from "@stylemart/shared/constants";
+import { LOW_STOCK_THRESHOLD, QUEUE_NAMES } from "@nexmart/shared/constants";
 
 interface StockAlertJobData {
   productId: string;
@@ -55,7 +55,7 @@ export const stockAlertWorker = new Worker<StockAlertJobData>(
     const { productId, productName, currentStock } = job.data;
 
     const admins = await User.find({
-      role: { $in: ["ADMIN", "SUPER_ADMIN"] },
+      role: "ADMIN",
       status: "ACTIVE",
     })
       .select("_id email name")
@@ -80,7 +80,7 @@ export const stockAlertWorker = new Worker<StockAlertJobData>(
     if (superAdmin?.email) {
       await emailService.sendRaw({
         to: superAdmin.email,
-        subject: `Low Stock: ${productName} — StyleMart Admin`,
+        subject: `Low Stock: ${productName} — NexMart Admin`,
         html: `<p>Hi ${superAdmin.name},</p><p>${message}</p><p><a href="${process.env.APP_URL}/admin/products">Manage Products</a></p>`,
       });
     }

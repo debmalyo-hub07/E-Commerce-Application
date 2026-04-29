@@ -16,7 +16,7 @@ import Review from './frontend/src/models/Review';
 
 
 async function seed() {
-  await mongoose.connect(MONGODB_URI);
+  await mongoose.connect(MONGODB_URI!);
   console.log('✅ Connected to MongoDB');
 
   // ── 1. Admin Users ────────────────────────────────────────
@@ -29,7 +29,7 @@ async function seed() {
       name: 'Super Admin',
       email: 'superadmin@store.com',
       passwordHash: superHash,
-      role: 'SUPER_ADMIN',
+      role: 'ADMIN',
       emailVerified: true,
       status: 'ACTIVE',
     },
@@ -38,10 +38,10 @@ async function seed() {
   console.log('✅ Super Admin seeded: superadmin@store.com / SuperAdmin@123');
 
   await User.findOneAndUpdate(
-    { email: 'admin@stylemart.in' },
+    { email: 'admin@nexmart.in' },
     {
       name: 'Store Admin',
-      email: 'admin@stylemart.in',
+      email: 'admin@nexmart.in',
       passwordHash: adminHash,
       role: 'ADMIN',
       emailVerified: true,
@@ -49,7 +49,7 @@ async function seed() {
     },
     { upsert: true, new: true }
   );
-  console.log('✅ Admin seeded: admin@stylemart.in / Admin@123456');
+  console.log('✅ Admin seeded: admin@nexmart.in / Admin@123456');
 
   // ── 2. Sample Customer ────────────────────────────────────
   const customerHash = await bcrypt.hash('Customer@123', 12);
@@ -162,7 +162,7 @@ async function seed() {
       name: 'Men\'s Classic Fit Oxford Dress Shirt',
       slug: 'mens-classic-fit-oxford-dress-shirt',
       description: '<p>Premium 100% cotton Oxford weave fabric. Classic fit for a comfortable, relaxed feel. Wrinkle-resistant and easy care. Available in multiple colors.</p>',
-      brand: 'StyleMart Essentials',
+      brand: 'NexMart Essentials',
       categoryId: categoryMap['fashion'],
       basePrice: 2499,
       sellingPrice: 1799,
@@ -260,7 +260,7 @@ async function seed() {
       name: 'Yoga Mat Premium Non-Slip 6mm Thick',
       slug: 'yoga-mat-premium-non-slip-6mm',
       description: '<p>Superior grip, dense cushioning, and eco-friendly TPE material. Perfect for yoga, Pilates, stretching, and floor exercises. Includes carrying strap.</p>',
-      brand: 'StyleMart Sport',
+      brand: 'NexMart Sport',
       categoryId: categoryMap['sports-fitness'],
       basePrice: 1999,
       sellingPrice: 1299,
@@ -327,7 +327,7 @@ async function seed() {
       name: 'Limited Edition Luxury Watch - Rose Gold',
       slug: 'limited-edition-luxury-watch-rose-gold',
       description: '<p>Exquisite rose gold finish with sapphire crystal glass. Swiss movement with 40-hour power reserve. Water resistant to 50m.</p>',
-      brand: 'StyleMart Prestige',
+      brand: 'NexMart Prestige',
       categoryId: categoryMap['fashion'],
       basePrice: 25999,
       sellingPrice: 19999,

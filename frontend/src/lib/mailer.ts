@@ -20,10 +20,10 @@ export const sendOTP = async (email: string, otp: string) => {
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
-    subject: 'Your Verification OTP Code',
+    subject: 'Your NexMart Verification Code',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
-        <h2 style="color: #333;">Welcome to StyleMart!</h2>
+        <h2 style="color: #333;">Welcome to NexMart!</h2>
         <p style="font-size: 16px; color: #555;">Please use the following OTP to verify your email address:</p>
         <div style="margin: 20px 0; padding: 15px; background-color: #f4f4f4; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #000;">
           ${otp}

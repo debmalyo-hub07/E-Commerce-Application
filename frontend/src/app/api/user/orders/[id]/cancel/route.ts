@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 import AuditLog from "@/models/AuditLog";
-import { ORDER_CANCEL_WINDOW_MS } from "@stylemart/shared/constants";
+import { ORDER_CANCEL_WINDOW_MS } from "@nexmart/shared/constants";
 import {
   successResponse,
   errorResponse,

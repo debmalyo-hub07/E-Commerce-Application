@@ -1,4 +1,4 @@
-# StyleMart - Production-Grade E-Commerce Platform
+# NexMart - Production-Grade E-Commerce Platform
 
 A modern, full-stack e-commerce platform built with Next.js 15, TypeScript, Tailwind CSS v4, and PostgreSQL. Designed to compete with platforms like Flipkart and Amazon.
 
@@ -135,7 +135,7 @@ SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="your-email@gmail.com"
 SMTP_PASSWORD="your-app-password"
-SMTP_FROM="noreply@stylemart.com"
+SMTP_FROM="noreply@nexmart.com"
 
 # Application
 APP_URL="http://localhost:3000"
@@ -260,8 +260,8 @@ This project is proprietary. All rights reserved.
 
 ## 🆘 Support
 
-For support, email support@stylemart.com or join our Slack community.
+For support, email support@nexmart.com or join our Slack community.
 
 ---
 
-**Built with ❤️ by the StyleMart Team**
+**Built with ❤️ by the NexMart Team**

@@ -39,7 +39,7 @@ export async function GET(
     }
 
     // Authorization check
-    const isAdmin = (session.user as any)?.role === "ADMIN" || (session.user as any)?.role === "SUPER_ADMIN";
+    const isAdmin = (session.user as any)?.role === "ADMIN";
     if (!isAdmin && order.userId.toString() !== session.user.id) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
@@ -83,7 +83,7 @@ export async function GET(
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">StyleMart</div>
+            <div class="logo">NexMart</div>
             <p style="margin: 0; color: #666;">Order Receipt</p>
           </div>
 
@@ -176,8 +176,8 @@ export async function GET(
           </div>
 
           <div class="footer">
-            <p>Thank you for your order! For support, email us at support@stylemart.in</p>
-            <p style="margin-top: 10px; font-size: 11px;">© 2026 StyleMart. All rights reserved.</p>
+            <p>Thank you for your order! For support, email us at support@nexmart.in</p>
+            <p style="margin-top: 10px; font-size: 11px;">© 2026 NexMart. All rights reserved.</p>
           </div>
         </div>
       </body>

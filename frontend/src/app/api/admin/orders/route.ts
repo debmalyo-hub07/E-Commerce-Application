@@ -9,7 +9,7 @@ import {
   unauthorizedResponse,
   buildPaginationMeta,
 } from "@/lib/api-response";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
 
 function isAdmin(role: string) {
   return role === "ADMIN";

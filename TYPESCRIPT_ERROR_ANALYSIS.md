@@ -93,7 +93,7 @@ TS6142: Module resolved to .tsx but '--jsx' is not set
 - `backend/src/services/notification.service.ts` (imports models)
 - `backend/src/services/cloudinary.service.ts` (imports shared utils)
 
-**Root Cause:** Backend cannot import from frontend using relative paths. No path alias configuration in `backend/tsconfig.json` for `@/*` or `@stylemart/*`. Email service imports TSX files which require JSX support.
+**Root Cause:** Backend cannot import from frontend using relative paths. No path alias configuration in `backend/tsconfig.json` for `@/*` or `@nexmart/*`. Email service imports TSX files which require JSX support.
 
 ---
 
@@ -172,7 +172,7 @@ TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property
 ## Priority Fixes Required
 
 1. **Critical:** Add `"jsx": "preserve"` to `backend/tsconfig.json` and configure path aliases
-2. **Critical:** Create `backend/tsconfig.json` path aliases for `@/*` → `frontend/src/*` and `@stylemart/*` → `shared/*`
+2. **Critical:** Create `backend/tsconfig.json` path aliases for `@/*` → `frontend/src/*` and `@nexmart/*` → `shared/*`
 3. **High:** Add `@types/jest` and configure Jest types in test tsconfig
 4. **High:** Type all implicit `any` parameters (use `unknown` + type guards where needed)
 5. **Medium:** Extract email templates to shared package or use `render-to-string` without JSX in service layer

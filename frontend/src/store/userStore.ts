@@ -52,7 +52,7 @@ export const useUserStore = create<UserState>()(
           }),
       })),
       {
-        name: "stylemart-wishlist",
+        name: "NexMart-wishlist",
         partialize: (state) => ({ wishlistIds: state.wishlistIds }),
       }
     ),

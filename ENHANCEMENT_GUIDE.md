@@ -121,7 +121,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=xxxxx
 SMTP_PASSWORD=xxxxx
-SMTP_FROM=noreply@stylemart.in
+SMTP_FROM=noreply@nexmart.in
 
 # App
 APP_URL=http://localhost:3000

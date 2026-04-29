@@ -1,6 +1,6 @@
 // ============================================================
 // App-Wide Constants
-// Import via: import { ... } from "@stylemart/shared/constants"
+// Import via: import { ... } from "@nexmart/shared/constants"
 // ============================================================
 
 // ── Order Policy ─────────────────────────────────────────────
@@ -50,7 +50,6 @@ export const CACHE_TTL = {
 
 // ── Roles (mirror of Mongoose enum for client-side use) ─────────
 export const ROLES = {
-  SUPER_ADMIN: "SUPER_ADMIN",
   ADMIN: "ADMIN",
   CUSTOMER: "CUSTOMER",
 } as const;

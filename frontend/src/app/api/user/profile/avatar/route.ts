@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     // Upload to Cloudinary
     const uploadResult = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: "stylemart/avatars", transformation: [{ width: 500, height: 500, crop: "fill" }] },
+        { folder: "NexMart/avatars", transformation: [{ width: 500, height: 500, crop: "fill" }] },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);

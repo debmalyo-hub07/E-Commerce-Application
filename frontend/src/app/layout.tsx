@@ -22,35 +22,35 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: {
-    default: "StyleMart — Premium E-Commerce Platform",
-    template: "%s | StyleMart",
+    default: "NexMart — Premium E-Commerce Platform",
+    template: "%s | NexMart",
   },
   description:
-    "Discover the latest trends in fashion, electronics, and lifestyle with StyleMart. Fast delivery, secure payments, and world-class products.",
-  keywords: ["ecommerce", "shopping", "fashion", "electronics", "StyleMart", "India"],
-  authors: [{ name: "StyleMart" }],
-  creator: "StyleMart",
-  metadataBase: new URL(process.env.APP_URL ?? "https://stylemart.in"),
+    "Discover the latest trends in fashion, electronics, and lifestyle with NexMart. Fast delivery, secure payments, and world-class products.",
+  keywords: ["ecommerce", "shopping", "fashion", "electronics", "NexMart", "India"],
+  authors: [{ name: "NexMart" }],
+  creator: "NexMart",
+  metadataBase: new URL(process.env.APP_URL ?? "https://nexmart.in"),
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: process.env.APP_URL ?? "https://stylemart.in",
-    siteName: "StyleMart",
-    title: "StyleMart — Premium E-Commerce Platform",
-    description: "Discover the latest trends with StyleMart. Fast delivery, secure payments.",
+    url: process.env.APP_URL ?? "https://nexmart.in",
+    siteName: "NexMart",
+    title: "NexMart — Premium E-Commerce Platform",
+    description: "Discover the latest trends with NexMart. Fast delivery, secure payments.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "StyleMart",
+        alt: "NexMart",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "StyleMart — Premium E-Commerce Platform",
-    description: "Discover the latest trends with StyleMart.",
+    title: "NexMart — Premium E-Commerce Platform",
+    description: "Discover the latest trends with NexMart.",
     images: ["/og-image.jpg"],
   },
   robots: {

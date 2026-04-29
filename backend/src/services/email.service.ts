@@ -38,7 +38,7 @@ interface SendEmailParams {
 }
 
 async function sendEmail(params: SendEmailParams): Promise<void> {
-  const from = process.env.SMTP_FROM ?? "StyleMart <noreply@stylemart.in>";
+  const from = process.env.SMTP_FROM ?? "NexMart <noreply@nexmart.in>";
 
   await transporter.sendMail({
     from,
@@ -96,7 +96,7 @@ export const emailService = {
     const html = await render(OrderConfirmEmail(props));
     await sendEmail({
       to,
-      subject: `Order Confirmed: ${props.orderNumber} — StyleMart`,
+      subject: `Order Confirmed: ${props.orderNumber} — NexMart`,
       html,
     });
   },
@@ -108,7 +108,7 @@ export const emailService = {
     const html = await render(ShippingUpdateEmail(props));
     await sendEmail({
       to,
-      subject: `Your order ${props.orderNumber} has been shipped — StyleMart`,
+      subject: `Your order ${props.orderNumber} has been shipped — NexMart`,
       html,
     });
   },
@@ -120,7 +120,7 @@ export const emailService = {
     const html = await render(RefundConfirmEmail(props));
     await sendEmail({
       to,
-      subject: `Refund Initiated for ${props.orderNumber} — StyleMart`,
+      subject: `Refund Initiated for ${props.orderNumber} — NexMart`,
       html,
     });
   },
@@ -132,7 +132,7 @@ export const emailService = {
     const html = await render(AccountSuspendedEmail(props));
     await sendEmail({
       to,
-      subject: "Important Notice: Your StyleMart Account Has Been Suspended",
+      subject: "Important Notice: Your NexMart Account Has Been Suspended",
       html,
     });
   },

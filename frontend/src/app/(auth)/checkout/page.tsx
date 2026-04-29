@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { CheckoutClient } from "./CheckoutClient";
+import CheckoutClient from "./CheckoutClient";
 import { auth } from "@/lib/auth/config";
 import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/mongoose";
@@ -38,8 +38,8 @@ export default async function CheckoutPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-3xl font-bold mb-8">Secure Checkout</h1>
-      <CheckoutClient initialAddresses={serialized} userEmail={session.user.email!} userName={session.user.name || "Customer"} />
+      <h1 className="text-3xl font-black mb-10 tracking-tight">Secure Checkout</h1>
+      <CheckoutClient initialAddresses={serialized} />
     </div>
   );
 }

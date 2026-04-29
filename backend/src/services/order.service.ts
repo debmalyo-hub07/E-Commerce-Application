@@ -3,8 +3,8 @@ import { connectDB } from "../lib/mongoose";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 import AuditLog from "@/models/AuditLog";
-import { generateOrderNumber } from "@stylemart/shared/utils";
-import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@stylemart/shared/constants";
+import { generateOrderNumber } from "@nexmart/shared/utils";
+import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@nexmart/shared/constants";
 
 export const orderService = {
   validateStock(cartItems: Array<{
@@ -66,6 +66,74 @@ export const orderService = {
     return generateOrderNumber();
   },
 
+  async createOrder(params: {
+    userId: string;
+    addressId: string;
+    addressSnapshot: any;
+    items: any[];
+    subtotal: number;
+    discountAmount: number;
+    gstAmount: number;
+    shippingAmount: number;
+    totalAmount: number;
+    couponCode?: string;
+    paymentMethod: "RAZORPAY" | "COD";
+    razorpayOrderId?: string;
+  }): Promise<any> {
+    await connectDB();
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // 1. Deduct stock for all items
+      for (const item of params.items) {
+        const product = await Product.findById(item.productId).session(session);
+        if (!product || !product.isActive) {
+          throw new Error(`Product ${item.productSnapshot?.name || item.productId} is not available.`);
+        }
+        if (product.stockQuantity < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name}.`);
+        }
+
+        await Product.findByIdAndUpdate(
+          item.productId,
+          { $inc: { stockQuantity: -item.quantity } },
+          { session }
+        );
+      }
+
+      // 2. Generate Order Number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+      // 3. Create Order
+      const [order] = await Order.create(
+        [
+          {
+            ...params,
+            orderNumber,
+            paymentStatus: params.paymentMethod === "COD" ? "PENDING_COD" : "PENDING",
+            orderStatus: "PENDING",
+          },
+        ],
+        { session }
+      );
+
+      // 4. If COD, delete cart items (for RAZORPAY, we wait for verify)
+      if (params.paymentMethod === "COD") {
+        const CartItem = (mongoose.models.CartItem as any) || mongoose.model("CartItem");
+        await CartItem.deleteMany({ userId: params.userId }).session(session);
+      }
+
+      await session.commitTransaction();
+      return order;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  },
+
   async getOrderWithDetails(orderId: string, userId?: string) {
     await connectDB();
     const filter: Record<string, unknown> = { _id: orderId };
@@ -73,55 +141,24 @@ export const orderService = {
 
     return Order.findOne(filter)
       .populate("userId", "name email phone")
-      .populate("addressId")
       .lean();
   },
 
-  async cancelOrder(
-    orderId: string,
-    cancelledBy: string,
-    reason?: string
-  ): Promise<void> {
+  async updateOrderStatus(orderId: string, updates: { orderStatus: string; trackingNumber?: string; notes?: string }) {
     await connectDB();
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error("Order not found");
 
-    try {
-      const order = await Order.findById(orderId).session(session);
-      if (!order) throw new Error("Order not found");
+    this.validateStatusTransition(order.orderStatus, updates.orderStatus);
 
-      for (const item of order.items) {
-        await Product.findByIdAndUpdate(
-          item.productId,
-          { $inc: { stockQuantity: item.quantity } },
-          { session }
-        );
-      }
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { $set: updates },
+      { new: true }
+    );
 
-      const newPaymentStatus =
-        order.paymentStatus === "PAYMENT_VERIFIED" || order.paymentStatus === "PENDING_COD"
-          ? "REFUND_INITIATED"
-          : "FAILED";
-
-      await Order.findByIdAndUpdate(orderId, {
-        orderStatus: "CANCELLED",
-        paymentStatus: newPaymentStatus,
-      }, { session });
-
-      await AuditLog.create([{
-        userId: cancelledBy,
-        action: "ORDER_CANCELLED",
-        entityType: "Order",
-        entityId: orderId,
-        metadata: { reason },
-      }], { session });
-
-      await session.commitTransaction();
-    } catch (err) {
-      await session.abortTransaction();
-      throw err;
-    } finally {
-      session.endSession();
-    }
+    // TODO: Trigger notifications via queue
+    
+    return updatedOrder;
   },
 };

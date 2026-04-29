@@ -97,6 +97,24 @@ export default function AdminProducts() {
     }
   };
 
+  const handleToggleProduct = async (id: string, field: "isActive" | "isFeatured", currentValue: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: !currentValue }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update ${field}`);
+      }
+
+      setProducts(products.map((p) => (p._id === id ? { ...p, [field]: !currentValue } : p)));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : `Failed to update ${field}`);
+    }
+  };
+
   const getPrimaryImage = (images: ProductImage[]) => {
     if (!images || images.length === 0) return null;
     return images.find(img => img.isPrimary)?.url || images[0].url;
@@ -240,13 +258,34 @@ export default function AdminProducts() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                            product.isActive
-                              ? "bg-primary/10 text-primary border-primary/20"
-                              : "bg-muted text-muted-foreground border-border"
-                          }`}>
-                            {product.isActive ? "Active" : "Draft"}
-                          </span>
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleProduct(product._id, "isActive", product.isActive);
+                              }}
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                                product.isActive
+                                  ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                                  : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                              }`}
+                            >
+                              {product.isActive ? "Active" : "Draft"}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleProduct(product._id, "isFeatured", product.isFeatured);
+                              }}
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                                product.isFeatured
+                                  ? "bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100"
+                                  : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                              }`}
+                            >
+                              {product.isFeatured ? "Featured" : "Standard"}
+                            </button>
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Learn how StyleMart collects, uses, and protects your personal data.",
+  description: "Learn how NexMart collects, uses, and protects your personal data.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
       <div className="prose prose-sm dark:prose-invert max-w-none space-y-6">
         <section>
           <h2 className="text-xl font-bold mt-8 mb-3">1. Introduction</h2>
-          <p>StyleMart (&ldquo;we&rdquo;, &ldquo;our&rdquo;, &ldquo;us&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website stylemart.in (the &ldquo;Service&rdquo;). Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.</p>
+          <p>NexMart (&ldquo;we&rdquo;, &ldquo;our&rdquo;, &ldquo;us&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website NexMart.in (the &ldquo;Service&rdquo;). Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.</p>
         </section>
 
         <section>
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-bold mt-8 mb-3">9. Data Protection Officer</h2>
-          <p>For privacy-related inquiries, contact our Data Protection Officer at: <strong>privacy@stylemart.in</strong></p>
+          <p>For privacy-related inquiries, contact our Data Protection Officer at: <strong>privacy@NexMart.in</strong></p>
         </section>
       </div>
     </div>

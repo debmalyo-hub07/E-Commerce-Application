@@ -50,7 +50,7 @@ export default function SearchResultsClient() {
       {!q && (
         <div className="text-center py-16">
           <SearchIcon className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Search StyleMart</h2>
+          <h2 className="text-xl font-bold mb-2">Search NexMart</h2>
           <p className="text-muted-foreground">Type a query to find products, brands, or categories.</p>
         </div>
       )}

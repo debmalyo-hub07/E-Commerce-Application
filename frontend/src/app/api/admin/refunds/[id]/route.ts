@@ -7,6 +7,7 @@ import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import AuditLog from "@/models/AuditLog";
 import User from "@/models/User";
+import { enqueueRefundEmail } from "@backend/jobs/email.queue";
 import {
   successResponse,
   errorResponse,
@@ -26,7 +27,7 @@ const refundApprovalSchema = z.object({
 });
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 const razorpay = new Razorpay({
@@ -129,7 +130,6 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       const user = await User.findById(order.userId);
       if (user) {
         try {
-          const { enqueueRefundEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
           await enqueueRefundEmail({
             to: user.email,
             customerName: user.name,

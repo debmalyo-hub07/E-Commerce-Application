@@ -74,7 +74,7 @@ export function RegisterForm() {
         toast.success("Account created! Please sign in.");
         router.push("/login");
       } else {
-        toast.success("Welcome to StyleMart!", { icon: "🎉" });
+        toast.success("Welcome to NexMart!", { icon: "🎉" });
         router.push("/");
         router.refresh();
       }

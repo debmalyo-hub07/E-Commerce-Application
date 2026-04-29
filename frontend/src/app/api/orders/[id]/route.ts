@@ -3,11 +3,12 @@ import { connectDB } from "@/lib/mongoose";
 import { auth } from "@/lib/auth/config";
 import Order from "@/models/Order";
 import mongoose from "mongoose";
+import { enqueueShippingUpdateEmail } from "@backend/jobs/email.queue";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await params;
     const session = await auth();
@@ -40,7 +41,7 @@ export async function GET(
     }
 
     // Check authorization - user can only view their own orders unless admin
-    const isAdmin = (session.user as any)?.role === "ADMIN" || (session.user as any)?.role === "SUPER_ADMIN";
+    const isAdmin = (session.user as any)?.role === "ADMIN";
     if (!isAdmin && order.userId.toString() !== session.user.id) {
       return NextResponse.json(
         { success: false, data: null, error: "Forbidden" },
@@ -77,11 +78,11 @@ export async function GET(
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await params;
     const session = await auth();
-    if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any)?.role)) {
+    if (!session?.user?.id || (session.user as any)?.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, data: null, error: "Unauthorized" },
         { status: 401 }
@@ -123,9 +124,6 @@ export async function PUT(
     // Queue notification email if status changed
     if (orderStatus && orderStatus !== "PENDING") {
       try {
-        const { enqueueShippingUpdateEmail } = await import("@stylemart/shared/lib/email-queue").then(
-          m => m.getEmailQueueFunctions()
-        );
         await enqueueShippingUpdateEmail({
           to: (order.userId as any).email,
           customerName: (order.userId as any).name,

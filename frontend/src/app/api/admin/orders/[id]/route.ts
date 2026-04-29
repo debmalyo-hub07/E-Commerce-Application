@@ -13,13 +13,14 @@ import {
   forbiddenResponse,
   unauthorizedResponse,
 } from "@/lib/api-response";
-import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@stylemart/shared/constants";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { ALLOWED_ORDER_STATUS_TRANSITIONS } from "@nexmart/shared/constants";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
+import { enqueueShippingUpdateEmail } from "@backend/jobs/email.queue";
 
 interface RouteContext { params: Promise<{ id: string }>; }
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 export async function GET(_req: NextRequest, ctx: RouteContext) {
@@ -130,7 +131,6 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       const user = await User.findById(order.userId);
       if (user && (orderStatus === "SHIPPED" || orderStatus === "DELIVERED")) {
         try {
-          const { enqueueShippingUpdateEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
           await enqueueShippingUpdateEmail({
             to: user.email,
             customerName: user.name,

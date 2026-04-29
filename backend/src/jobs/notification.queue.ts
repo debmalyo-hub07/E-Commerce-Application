@@ -1,7 +1,7 @@
 import { Queue, Worker, Job } from "bullmq";
 import { createIORedisConnection } from "../lib/redis";
 import { notificationService, type CreateNotificationParams } from "../services/notification.service";
-import { QUEUE_NAMES } from "@stylemart/shared/constants";
+import { QUEUE_NAMES } from "@nexmart/shared/constants";
 
 export const notificationQueue = new Queue(QUEUE_NAMES.NOTIFICATION, {
   connection: createIORedisConnection(),

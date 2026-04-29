@@ -3,7 +3,7 @@ version: "3.9"
 services:
   mongodb:
     image: mongo:7
-    container_name: stylemart_mongodb
+    container_name: nexmart_mongodb
     restart: unless-stopped
     command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
@@ -18,7 +18,7 @@ services:
 
   mongo-init:
     image: mongo:7
-    container_name: stylemart_mongo_init
+    container_name: nexmart_mongo_init
     depends_on:
       mongodb:
         condition: service_healthy
@@ -28,7 +28,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: stylemart_redis
+    container_name: nexmart_redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:

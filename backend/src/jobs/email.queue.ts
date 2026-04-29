@@ -3,7 +3,7 @@ import { createIORedisConnection } from "../lib/redis";
 import { emailService } from "../services/email.service";
 import { connectDB } from "../lib/mongoose";
 import AuditLog from "@/models/AuditLog";
-import { EMAIL_JOBS, QUEUE_NAMES } from "@stylemart/shared/constants";
+import { EMAIL_JOBS, QUEUE_NAMES } from "@nexmart/shared/constants";
 
 export const emailQueue = new Queue(QUEUE_NAMES.EMAIL, {
   connection: createIORedisConnection(),
@@ -92,7 +92,7 @@ export const emailWorker = new Worker<EmailJobData>(
       case EMAIL_JOBS.ACCOUNT_SUSPENDED:
         await emailService.sendAccountSuspended(payload.to, {
           ...payload,
-          supportEmail: "support@stylemart.in",
+          supportEmail: "support@nexmart.in",
         });
         break;
 

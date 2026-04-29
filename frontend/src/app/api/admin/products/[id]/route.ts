@@ -12,15 +12,15 @@ import {
   notFoundResponse,
 } from "@/lib/api-response";
 import { z } from "zod";
-import { slugify } from "@stylemart/shared/utils";
-import { rateLimiters, applyRateLimit } from "@stylemart/shared/lib/ratelimit";
+import { slugify } from "@nexmart/shared/utils";
+import { rateLimiters, applyRateLimit } from "@nexmart/shared/lib/ratelimit";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
 function isAdmin(role: string) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN";
 }
 
 const createProductSchema = z.object({
@@ -77,6 +77,8 @@ export async function GET(request: NextRequest, ctx: RouteContext) {
   }
 }
 
+import { redis } from "@/lib/redis";
+
 export async function PUT(request: NextRequest, ctx: RouteContext) {
   const session = await auth();
   const token = session?.user;
@@ -125,6 +127,14 @@ export async function PUT(request: NextRequest, ctx: RouteContext) {
       entityId: id,
       metadata: { name: updated.name },
     });
+
+    try {
+      const keys = await redis.keys("products:list:*");
+      if (keys.length > 0) await redis.del(...keys);
+      await redis.del(`product:${updated.slug}`);
+    } catch (cacheErr) {
+      console.error("[PUT /api/admin/products/[id]] Redis Cache Error:", cacheErr);
+    }
 
     return successResponse(updated);
   } catch (err) {

@@ -1,5 +1,5 @@
 {
-  "name": "@stylemart/backend",
+  "name": "@nexmart/backend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@stylemart/shared": "*",
+    "@nexmart/shared": "*",
     "@upstash/ratelimit": "^1.2.0",
     "@upstash/redis": "^1.35.2",
     "@react-email/components": "^0.0.32",

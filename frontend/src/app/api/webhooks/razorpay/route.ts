@@ -7,6 +7,10 @@ import Product from "@/models/Product";
 import Payment from "@/models/Payment";
 import ProcessedWebhookEvent from "@/models/ProcessedWebhookEvent";
 import User from "@/models/User";
+import {
+  enqueueOrderConfirmEmail,
+  enqueueRefundEmail,
+} from "@backend/jobs/email.queue";
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,7 +71,6 @@ export async function POST(request: NextRequest) {
                 : "Delivery Address";
 
             try {
-              const { enqueueOrderConfirmEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
               await enqueueOrderConfirmEmail({
                 to: user.email,
                 customerName: user.name,
@@ -140,7 +143,6 @@ export async function POST(request: NextRequest) {
               if (user) {
                 const refundAmount = (refund.amount as number) / 100;
                 try {
-                  const { enqueueRefundEmail } = await import("@stylemart/shared/lib/email-queue").then(m => m.getEmailQueueFunctions());
                   await enqueueRefundEmail({
                     to: user.email,
                     customerName: user.name,

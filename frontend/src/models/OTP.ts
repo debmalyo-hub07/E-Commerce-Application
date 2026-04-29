@@ -14,6 +14,6 @@ const OTPSchema = new Schema<IOTP>({
   expiresAt: { type: Date, required: true }
 });
 
-const OTP: Model<IOTP> = mongoose.models.OTP || mongoose.model<IOTP>('OTP', OTPSchema);
+const OTP: Model<IOTP> = (mongoose.models.OTP as Model<IOTP>) || mongoose.model<IOTP>('OTP', OTPSchema);
 
 export default OTP;
