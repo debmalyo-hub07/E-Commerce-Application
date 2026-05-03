@@ -11,7 +11,7 @@ import {
 } from "@/lib/api-response";
 
 function isAdmin(role: string) {
-  return role === "ADMIN";
+  return role === "ADMIN" || role === "SUPER_ADMIN";
 }
 
 export async function GET(request: NextRequest) {

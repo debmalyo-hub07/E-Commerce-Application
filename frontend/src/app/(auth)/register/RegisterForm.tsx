@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
-import { Loader2, Mail, Lock, UserPlus, User } from "lucide-react";
+import { Loader2, Mail, Lock, UserPlus, User, Eye, EyeOff } from "lucide-react";
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
@@ -23,6 +23,8 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export function RegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -35,7 +37,6 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      // 1. Create account
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,7 +44,7 @@ export function RegisterForm() {
           name: data.name,
           email: data.email,
           password: data.password,
-          role: "CUSTOMER", // explicit default
+          role: "CUSTOMER",
         }),
       });
 
@@ -55,7 +56,6 @@ export function RegisterForm() {
 
       if (responseData.data?.requiresOtp) {
         toast.success(responseData.data.message || "Please verify your email!");
-        // Store password temporarily in sessionStorage for auto-login after verification
         if (typeof window !== "undefined") {
           sessionStorage.setItem("temp_reg_pwd", data.password);
         }
@@ -63,7 +63,6 @@ export function RegisterForm() {
         return;
       }
 
-      // 2. Auto login (fallback if no OTP required)
       const result = await signIn("credentials", {
         redirect: false,
         email: data.email,
@@ -108,7 +107,7 @@ export function RegisterForm() {
               className={`block w-full pl-10 pr-3 py-2.5 border ${
                 errors.name ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-primary/20"
               } rounded-xl bg-background text-sm focus:outline-none focus:ring-2`}
-              placeholder="John Doe"
+              placeholder="Enter full name"
               disabled={isLoading}
             />
           </div>
@@ -132,7 +131,7 @@ export function RegisterForm() {
               className={`block w-full pl-10 pr-3 py-2.5 border ${
                 errors.email ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-primary/20"
               } rounded-xl bg-background text-sm focus:outline-none focus:ring-2`}
-              placeholder="you@example.com"
+              placeholder="Email Address"
               disabled={isLoading}
             />
           </div>
@@ -152,13 +151,24 @@ export function RegisterForm() {
             <input
               {...register("password")}
               id="password"
-              type="password"
-              className={`block w-full pl-10 pr-3 py-2.5 border ${
+              type={showPassword ? "text" : "password"}
+              className={`block w-full pl-10 pr-10 py-2.5 border ${
                 errors.password ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-primary/20"
               } rounded-xl bg-background text-sm focus:outline-none focus:ring-2`}
-              placeholder="••••••••"
+              placeholder="Password"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
           </div>
           {errors.password && (
             <p className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>
@@ -176,13 +186,24 @@ export function RegisterForm() {
             <input
               {...register("confirmPassword")}
               id="confirmPassword"
-              type="password"
-              className={`block w-full pl-10 pr-3 py-2.5 border ${
+              type={showConfirmPassword ? "text" : "password"}
+              className={`block w-full pl-10 pr-10 py-2.5 border ${
                 errors.confirmPassword ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-primary/20"
               } rounded-xl bg-background text-sm focus:outline-none focus:ring-2`}
-              placeholder="••••••••"
+              placeholder="Confirm Password"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
           </div>
           {errors.confirmPassword && (
             <p className="mt-1.5 text-xs text-destructive">{errors.confirmPassword.message}</p>

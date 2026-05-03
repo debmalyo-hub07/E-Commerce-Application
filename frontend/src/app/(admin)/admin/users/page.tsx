@@ -244,7 +244,7 @@ export default function AdminUsersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right relative z-10">
-                        <Link href={`/admin/users/${user._id}`} onClick={(e) => e.stopPropagation()}>
+                        <Link href={`/admin/users/${user._id}?mode=manage`} onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" className="text-primary hover:text-white rounded-xl px-4 group/btn relative overflow-hidden transition-all shadow-sm">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity z-0" />
                             <UserCog className="w-4 h-4 mr-2 relative z-10" />

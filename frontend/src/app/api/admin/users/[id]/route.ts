@@ -21,8 +21,7 @@ function isAdmin(role: string) {
 }
 const updateUserSchema = z.object({
   role: z.enum(["CUSTOMER", "ADMIN"]).optional(),
-  status: z.enum(["ACTIVE", "SUSPENDED", "DELETED"]).optional(),
-  name: z.string().min(2).optional(),
+  status: z.enum(["ACTIVE", "SUSPENDED"]).optional(),
 });
 
 export async function GET(_req: NextRequest, ctx: RouteContext) {
@@ -71,7 +70,13 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       );
     }
 
-
+    if (validated.data.status === "DELETED") {
+      return errorResponse(
+        "Cannot set status to DELETED",
+        "INVALID_ACTION",
+        400
+      );
+    }
 
     const updateData: Record<string, unknown> = { ...validated.data };
 
@@ -84,7 +89,6 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
     const changes: Record<string, unknown> = {};
     if (validated.data.role) changes.role = `${user.role} → ${validated.data.role}`;
     if (validated.data.status) changes.status = `${user.status} → ${validated.data.status}`;
-    if (validated.data.name) changes.name = validated.data.name;
 
     await AuditLog.create({
       userId: token.id,

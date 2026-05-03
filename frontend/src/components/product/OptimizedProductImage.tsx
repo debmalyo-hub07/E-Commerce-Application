@@ -27,37 +27,23 @@ export function OptimizedProductImage({
   fill,
   sizes,
 }: OptimizedProductImageProps) {
-  const [imageSrc, setImageSrc] = useState(src || getFallbackProductImage(productName));
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
+  // Reset state when src changes
   useEffect(() => {
-    setImageSrc(src || getFallbackProductImage(productName));
-    setIsLoading(true);
+    setIsLoaded(false);
     setHasError(false);
-  }, [src, productName]);
+  }, [src]);
 
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-    onLoad?.();
-  };
-
-  const handleError = () => {
-    const fallbackSrc = getFallbackProductImage(productName);
-    if (imageSrc !== fallbackSrc) {
-      setImageSrc(fallbackSrc);
-    } else {
-      setHasError(true);
-      setIsLoading(false);
-    }
-  };
+  const displaySrc = hasError || !src ? getFallbackProductImage(productName) : src;
 
   return (
     <div className={`relative w-full h-full overflow-hidden bg-muted/20 ${className}`}>
-      {/* Loading skeleton */}
-      {isLoading && (
+      {/* Loading skeleton (stays behind the image) */}
+      {!isLoaded && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-muted via-muted/50 to-muted"
+          className="absolute inset-0 bg-gradient-to-r from-muted via-muted/50 to-muted z-0"
           animate={{
             backgroundPosition: ["200% 0", "-200% 0"],
           }}
@@ -65,31 +51,27 @@ export function OptimizedProductImage({
         />
       )}
 
-      {/* Image with error boundary */}
-      {!hasError ? (
-        <Image
-          src={imageSrc}
-          alt={alt}
-          fill={fill}
-          sizes={sizes}
-          className={`object-cover transition-opacity duration-300 ${
-            isLoading ? "opacity-0" : "opacity-100"
-          }`}
-          onLoad={handleLoadingComplete}
-          onError={handleError}
-          priority={false}
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/40 to-muted/20">
-          <motion.div
-            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-muted-foreground/60"
-          >
-            <ImageOff className="w-12 h-12 opacity-50" />
-          </motion.div>
-        </div>
-      )}
+      {/* Image */}
+      <img
+        ref={(el) => {
+          if (el?.complete && !isLoaded) {
+            setIsLoaded(true);
+          }
+        }}
+        src={displaySrc}
+        alt={alt}
+        className="object-cover w-full h-full z-10 relative"
+        onLoad={() => {
+          setIsLoaded(true);
+          onLoad?.();
+        }}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(true); // Stop skeleton if error
+        }}
+        loading="lazy"
+        decoding="async"
+      />
     </div>
   );
 }

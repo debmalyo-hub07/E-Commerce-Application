@@ -57,6 +57,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // If the user's email is already verified (e.g., via Google OAuth), skip OTP
+    if (existingUser?.emailVerified) {
+      return successResponse(
+        {
+          requiresOtp: false,
+          email: user.email,
+          message: "Password set successfully. You can now sign in.",
+        },
+        201
+      );
+    }
+
     // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     

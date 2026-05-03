@@ -46,6 +46,16 @@ const nextConfig: NextConfig = {
   // ── Dev Indicators (Next.js 16) ─────────────────────────────
   devIndicators: false as any,
 
+  // ── Experimental Features ──────────────────────────────────
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "framer-motion",
+      "@radix-ui/react-icons",
+    ],
+  },
+
 };
 
 export default nextConfig;

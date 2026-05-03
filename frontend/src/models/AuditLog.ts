@@ -29,6 +29,7 @@ const AuditLogSchema = new Schema<IAuditLog>(
 AuditLogSchema.index({ userId: 1 });
 AuditLogSchema.index({ action: 1 });
 AuditLogSchema.index({ createdAt: 1 });
+AuditLogSchema.index({ entityId: 1, createdAt: -1 });
 
 const AuditLog: Model<IAuditLog> =
   (mongoose.models.AuditLog as Model<IAuditLog>) || mongoose.model<IAuditLog>('AuditLog', AuditLogSchema);

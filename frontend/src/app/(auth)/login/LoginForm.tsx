@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
-import { Loader2, Mail, Lock, LogIn } from "lucide-react";
+import { Loader2, Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -22,11 +22,11 @@ export function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const verified = searchParams.get("verified");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (verified === "true") {
       toast.success("Email verified! You can now log in.", { id: "verified-toast" });
-      // Remove query param to prevent toast firing again
       router.replace("/login");
     }
   }, [verified, router]);
@@ -53,7 +53,7 @@ export function LoginForm() {
       } else {
         toast.success("Welcome back!", { icon: "👋" });
         router.push(callbackUrl);
-        router.refresh(); // Refresh session
+        router.refresh();
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
@@ -85,7 +85,7 @@ export function LoginForm() {
               className={`block w-full pl-10 pr-3 py-2.5 border ${
                 errors.email ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-primary/20"
               } rounded-xl bg-background text-sm focus:outline-none focus:ring-2`}
-              placeholder="you@example.com"
+              placeholder="Email Address"
               disabled={isLoading}
             />
           </div>
@@ -105,37 +105,28 @@ export function LoginForm() {
             <input
               {...register("password")}
               id="password"
-              type="password"
-              className={`block w-full pl-10 pr-3 py-2.5 border ${
+              type={showPassword ? "text" : "password"}
+              className={`block w-full pl-10 pr-10 py-2.5 border ${
                 errors.password ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-primary/20"
               } rounded-xl bg-background text-sm focus:outline-none focus:ring-2`}
-              placeholder="••••••••"
+              placeholder="Password"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
           </div>
           {errors.password && (
             <p className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>
           )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20 bg-background"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
-              Remember me
-            </label>
-          </div>
-
-          <div className="text-sm">
-            <a href="#" className="font-medium text-primary hover:text-primary/80">
-              Forgot your password?
-            </a>
-          </div>
         </div>
 
         <button

@@ -120,8 +120,6 @@ export default function CheckoutClient({ initialAddresses }: CheckoutClientProps
         // Razorpay flow
         const options = {
           key: orderData.keyId,
-          amount: Math.round(orderData.amount * 100),
-          currency: orderData.currency,
           name: "NexMart",
           description: `Order #${orderData.orderNumber}`,
           order_id: orderData.razorpayOrderId,

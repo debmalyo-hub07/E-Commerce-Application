@@ -4,6 +4,20 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Star,
+  User,
+  Package,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Loader2,
+  ShieldCheck,
+  MessageSquare,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Review {
   _id: string;
@@ -130,7 +144,7 @@ export default function AdminReviewDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading review...</p>
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -140,7 +154,7 @@ export default function AdminReviewDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || "Review not found"}</p>
-          <Link href="/admin/reviews" className="text-blue-600 hover:underline">
+          <Link href="/admin/reviews" className="text-primary hover:underline">
             Back to Reviews
           </Link>
         </div>
@@ -148,94 +162,238 @@ export default function AdminReviewDetailPage() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{review.title}</h1>
-                <div className="mt-2 space-y-1">
-                  <p className="text-gray-600">
-                    Rating: <span className="text-lg">{"⭐".repeat(review.rating)}</span> ({review.rating}/5)
-                  </p>
-                  <p className="text-gray-600">Author: {review.userId.name}</p>
-                  <p className="text-gray-600">Product: {review.productId.name}</p>
-                </div>
-              </div>
-              <div className="flex gap-2 flex-col">
-                {review.isVerifiedPurchase && (
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded text-center">
-                    ✓ Verified Purchase
-                  </span>
-                )}
-                <span
-                  className={`px-3 py-1 text-sm rounded text-center ${
-                    review.isApproved
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {review.isApproved ? "Approved" : "Pending"}
-                </span>
-              </div>
-            </div>
-          </div>
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-5 h-5 ${
+              star <= rating
+                ? "fill-yellow-400 text-yellow-400"
+                : "fill-muted text-muted"
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
 
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-semibold mb-4">Review Content</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{review.body}</p>
-            <p className="text-gray-500 text-sm mt-4">
-              Submitted on {new Date(review.createdAt).toLocaleDateString()}
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6 max-w-5xl mx-auto pb-10"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/reviews"
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Review Details
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Review moderation
             </p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {review.isVerifiedPurchase && (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+              <ShieldCheck className="w-4 h-4" /> Verified Purchase
+            </span>
+          )}
+          <span
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+              review.isApproved
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-yellow-50 text-yellow-700 border-yellow-200"
+            }`}
+          >
+            {review.isApproved ? (
+              <>
+                <CheckCircle2 className="w-3 h-3" /> Approved
+              </>
+            ) : (
+              <>
+                <Clock className="w-3 h-3" /> Pending
+              </>
+            )}
+          </span>
+        </div>
+      </div>
 
-          <div className="px-6 py-4 border-t">
-            <h2 className="text-xl font-semibold mb-4">Moderation</h2>
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Moderation Note (optional)
-              </label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Add internal notes for your decision..."
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-5 border-b border-border bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+              <div className="flex items-start justify-between">
+                <div>
+                  {renderStars(review.rating)}
+                  <h2 className="text-xl font-bold text-foreground mt-3">
+                    {review.title}
+                  </h2>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-primary">
+                    {review.rating}/5
+                  </p>
+                  <p className="text-xs text-muted-foreground">Rating</p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={handleApprove}
-                disabled={processing}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
-              >
-                {processing ? "Processing..." : "Approve Review"}
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={processing}
-                className="flex-1 px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 font-medium"
-              >
-                {processing ? "Processing..." : "Reject Review"}
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={processing}
-                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 font-medium"
-              >
-                {processing ? "Processing..." : "Delete Review"}
-              </button>
-              <Link
-                href="/admin/reviews"
-                className="flex-1 px-6 py-3 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 text-center font-medium"
-              >
-                Cancel
-              </Link>
+            <div className="p-6">
+              <div className="bg-muted/30 rounded-xl p-4 mb-6 border border-border/50">
+                <p className="text-foreground italic leading-relaxed whitespace-pre-wrap">
+                  "{review.body}"
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  Submitted on{" "}
+                  {new Date(review.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Moderation
+              </h2>
+            </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Moderation Note (internal)
+                </label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Add internal notes for your decision..."
+                  rows={3}
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-foreground resize-none"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleApprove}
+                  disabled={processing || review.isApproved}
+                  className="flex-1 rounded-xl bg-green-600 hover:bg-green-700"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Approve
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleReject}
+                  disabled={processing || !review.isApproved}
+                  variant="outline"
+                  className="flex-1 rounded-xl text-yellow-700 border-yellow-200 hover:bg-yellow-50"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  disabled={processing}
+                  variant="destructive"
+                  className="flex-1 rounded-xl"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-    </div>
+
+        <div className="space-y-6">
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Reviewer
+              </h2>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Name</p>
+                <p className="font-semibold text-foreground">
+                  {review.userId.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Email</p>
+                <p className="font-semibold text-foreground">
+                  {review.userId.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Product
+              </h2>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Name</p>
+                <p className="font-semibold text-foreground">
+                  {review.productId.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Slug</p>
+                <p className="font-mono text-sm text-foreground">
+                  {review.productId.slug}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }

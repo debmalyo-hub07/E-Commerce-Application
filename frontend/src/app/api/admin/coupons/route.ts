@@ -13,7 +13,7 @@ import {
 import { z } from "zod";
 
 function isAdmin(role: string) {
-  return role === "ADMIN";
+  return role === "ADMIN" || role === "SUPER_ADMIN";
 }
 
 const createCouponSchema = z.object({

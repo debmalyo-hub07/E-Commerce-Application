@@ -2,6 +2,7 @@ import { type NextRequest } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { connectDB } from "@/lib/mongoose";
 import User from "@/models/User";
+import AuditLog from "@/models/AuditLog";
 import { successResponse, errorResponse, unauthorizedResponse } from "@/lib/api-response";
 import { z } from "zod";
 
@@ -37,7 +38,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = updateProfileSchema.safeParse(body);
-    
+
     if (!validated.success) {
       return errorResponse(
         validated.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
@@ -47,7 +48,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     await connectDB();
-    const updateData: any = {};
+
+    const existingUser = await User.findById(token.id);
+    if (!existingUser) return errorResponse("User not found", "NOT_FOUND", 404);
+
+    const updateData: Record<string, unknown> = {};
     if (validated.data.name !== undefined) updateData.name = validated.data.name;
     if (validated.data.phone !== undefined) updateData.phone = validated.data.phone === "" ? null : validated.data.phone;
     if (validated.data.gender !== undefined) updateData.gender = validated.data.gender === "" ? null : validated.data.gender;
@@ -56,6 +61,36 @@ export async function PATCH(request: NextRequest) {
 
     const user = await User.findByIdAndUpdate(token.id, updateData, { new: true }).select("-passwordHash").lean();
     if (!user) return errorResponse("User not found", "NOT_FOUND", 404);
+
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+    if (validated.data.name !== undefined && existingUser.name !== validated.data.name) {
+      changes.name = { old: existingUser.name, new: validated.data.name };
+    }
+    if (validated.data.phone !== undefined) {
+      const oldPhone = existingUser.phone || null;
+      const newPhone = validated.data.phone === "" ? null : validated.data.phone;
+      if (oldPhone !== newPhone) changes.phone = { old: oldPhone, new: newPhone };
+    }
+    if (validated.data.gender !== undefined) {
+      const oldGender = existingUser.gender || null;
+      const newGender = validated.data.gender === "" ? null : validated.data.gender;
+      if (oldGender !== newGender) changes.gender = { old: oldGender, new: newGender };
+    }
+    if (validated.data.dob !== undefined) {
+      const oldDob = existingUser.dob ? existingUser.dob.toISOString() : null;
+      const newDob = validated.data.dob ? new Date(validated.data.dob).toISOString() : null;
+      if (oldDob !== newDob) changes.dob = { old: oldDob, new: newDob };
+    }
+
+    if (Object.keys(changes).length > 0) {
+      await AuditLog.create({
+        userId: token.id,
+        action: "USER_PROFILE_UPDATED",
+        entityType: "User",
+        entityId: token.id,
+        metadata: changes,
+      });
+    }
 
     return successResponse(user);
   } catch (err) {

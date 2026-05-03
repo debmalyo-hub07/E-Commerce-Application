@@ -31,6 +31,9 @@ export default function cloudinaryLoader({
         url.searchParams.set("q", quality.toString());
         url.searchParams.set("auto", "format");
         url.searchParams.set("fit", "crop");
+      } else {
+        url.searchParams.set("w", width.toString());
+        url.searchParams.set("q", quality.toString());
       }
       return url.toString();
     } catch {

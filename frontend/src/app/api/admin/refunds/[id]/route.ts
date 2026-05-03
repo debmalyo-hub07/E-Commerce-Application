@@ -5,6 +5,7 @@ import Razorpay from "razorpay";
 import { connectDB } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
+import Product from "@/models/Product";
 import AuditLog from "@/models/AuditLog";
 import User from "@/models/User";
 import { enqueueRefundEmail } from "@backend/jobs/email.queue";
@@ -27,7 +28,7 @@ const refundApprovalSchema = z.object({
 });
 
 function isAdmin(role: string) {
-  return role === "ADMIN";
+  return role === "ADMIN" || role === "SUPER_ADMIN";
 }
 
 const razorpay = new Razorpay({
@@ -95,6 +96,14 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
           );
         }
 
+        for (const item of order.items) {
+          await Product.findByIdAndUpdate(
+            item.productId,
+            { $inc: { stockQuantity: item.quantity } },
+            { session: mongoSession }
+          );
+        }
+
         await Order.findByIdAndUpdate(
           id,
           { paymentStatus: "REFUNDED", orderStatus: "REFUNDED" },
@@ -103,7 +112,13 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       } else {
         await Order.findByIdAndUpdate(
           id,
-          { paymentStatus: "PAYMENT_VERIFIED" },
+          { paymentStatus: "PAYMENT_VERIFIED", orderStatus: "DELIVERED" },
+          { session: mongoSession }
+        );
+
+        await Payment.findOneAndUpdate(
+          { orderId: id },
+          { refundStatus: "REJECTED" },
           { session: mongoSession }
         );
       }

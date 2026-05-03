@@ -4,15 +4,41 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Banknote,
+  Package,
+  User,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Loader2,
+  FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface RefundItem {
+  productSnapshot: Record<string, unknown>;
+  quantity: number;
+  totalPrice: number;
+  unitPrice: number;
+}
 
 interface Refund {
   _id: string;
   orderNumber: string;
   totalAmount: number;
+  subtotal: number;
+  gstAmount: number;
+  shippingAmount: number;
+  discountAmount: number;
   paymentStatus: string;
   orderStatus: string;
-  items: Array<{ productSnapshot: Record<string, unknown>; quantity: number; totalPrice: number }>;
+  items: RefundItem[];
   userId: { name: string; email: string };
+  addressSnapshot: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -107,7 +133,7 @@ export default function AdminRefundDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading refund details...</p>
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -117,7 +143,7 @@ export default function AdminRefundDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || "Refund not found"}</p>
-          <Link href="/admin/refunds" className="text-blue-600 hover:underline">
+          <Link href="/admin/refunds" className="text-primary hover:underline">
             Back to Refunds
           </Link>
         </div>
@@ -125,98 +151,267 @@ export default function AdminRefundDetailPage() {
     );
   }
 
+  const getStatusBadge = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case "REFUNDED":
+        return (
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+            <CheckCircle2 className="w-3 h-3" /> Refunded
+          </span>
+        );
+      case "REJECTED":
+        return (
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+            <XCircle className="w-3 h-3" /> Rejected
+          </span>
+        );
+      default:
+        return (
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">
+            <Clock className="w-3 h-3" /> Pending
+          </span>
+        );
+    }
+  };
+
   return (
-    <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Refund Request: {refund.orderNumber}
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Requested on {new Date(refund.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-              <span className="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
-                {refund.paymentStatus}
-              </span>
-            </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6 max-w-5xl mx-auto pb-10"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/refunds"
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Refund Request
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Order #{refund.orderNumber}
+            </p>
           </div>
+        </div>
+        {getStatusBadge(refund.paymentStatus)}
+      </div>
 
-          <div className="px-6 py-4">
-            <h2 className="text-xl font-semibold mb-4">Customer Information</h2>
-            <div className="bg-gray-50 p-4 rounded">
-              <p className="font-medium">{refund.userId.name}</p>
-              <p className="text-gray-600">{refund.userId.email}</p>
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="bg-red-50 border border-red-100 p-4 rounded-xl text-red-800 font-medium text-sm flex items-center gap-2"
+        >
+          <AlertCircle className="w-4 h-4" /> {error}
+        </motion.div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Order Items
+              </h2>
             </div>
-          </div>
-
-          <div className="px-6 py-4 border-t">
-            <h2 className="text-xl font-semibold mb-4">Order Items</h2>
-            <div className="space-y-3">
+            <div className="divide-y divide-border">
               {refund.items.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center py-2 border-b">
-                  <div className="flex-1">
-                    <p className="font-medium">
-                      {(item.productSnapshot as any)?.name || "Product"}
+                <div key={idx} className="p-4 flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                    <Package className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground truncate">
+                      {(item.productSnapshot as Record<string, string>)?.name ||
+                        "Product"}
                     </p>
-                    <p className="text-gray-600">Quantity: {item.quantity}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Qty: {item.quantity} × ₹{item.unitPrice?.toFixed(2) || "0.00"}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">₹{item.totalPrice.toFixed(2)}</p>
+                    <p className="font-bold text-foreground">
+                      ₹{item.totalPrice.toFixed(2)}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="px-6 py-4 bg-gray-50">
-            <div className="flex justify-between text-lg font-bold">
-              <p>Refund Amount:</p>
-              <p>₹{refund.totalAmount.toFixed(2)}</p>
+            <div className="px-6 py-4 bg-muted/20 border-t border-border space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-foreground font-medium">
+                  ₹{refund.subtotal?.toFixed(2) || "0.00"}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">GST</span>
+                <span className="text-foreground font-medium">
+                  ₹{refund.gstAmount?.toFixed(2) || "0.00"}
+                </span>
+              </div>
+              {refund.shippingAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-foreground font-medium">
+                    ₹{refund.shippingAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              {refund.discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount</span>
+                  <span className="font-medium">
+                    -₹{refund.discountAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
+                <span>Refund Amount</span>
+                <span className="text-primary">
+                  ₹{refund.totalAmount.toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t">
-            <h2 className="text-xl font-semibold mb-4">Decision</h2>
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Note (optional)
-              </label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Add a note for the customer..."
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Decision
+              </h2>
             </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Admin Note (optional)
+                </label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Add a note for the customer..."
+                  rows={3}
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-foreground resize-none"
+                />
+              </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={handleApprove}
-                disabled={processing}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
-              >
-                {processing ? "Processing..." : "Approve Refund"}
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={processing}
-                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 font-medium"
-              >
-                {processing ? "Processing..." : "Reject Refund"}
-              </button>
-              <Link
-                href="/admin/refunds"
-                className="flex-1 px-6 py-3 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 text-center font-medium"
-              >
-                Cancel
-              </Link>
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleApprove}
+                  disabled={processing || refund.paymentStatus !== "REFUND_INITIATED"}
+                  className="flex-1 rounded-xl bg-green-600 hover:bg-green-700"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Approve Refund
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleReject}
+                  disabled={processing || refund.paymentStatus !== "REFUND_INITIATED"}
+                  variant="destructive"
+                  className="flex-1 rounded-xl"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject Refund
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {refund.paymentStatus !== "REFUND_INITIATED" && (
+                <p className="text-sm text-muted-foreground text-center">
+                  This refund request has already been processed.
+                </p>
+              )}
             </div>
           </div>
         </div>
-    </div>
+
+        <div className="space-y-6">
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Customer
+              </h2>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Name</p>
+                <p className="font-semibold text-foreground">
+                  {refund.userId.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Email</p>
+                <p className="font-semibold text-foreground">
+                  {refund.userId.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border bg-muted/30">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Timeline
+              </h2>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">
+                  Requested On
+                </p>
+                <p className="font-semibold text-foreground">
+                  {new Date(refund.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">
+                  Order Status
+                </p>
+                <p className="font-semibold text-foreground capitalize">
+                  {refund.orderStatus.toLowerCase().replace(/_/g, " ")}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">
+                  Payment Status
+                </p>
+                <div className="mt-1">{getStatusBadge(refund.paymentStatus)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
