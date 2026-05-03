@@ -43,9 +43,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // ── Dev Indicators (Next.js 16) ─────────────────────────────
   devIndicators: false as any,
 
